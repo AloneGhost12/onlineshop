@@ -1,5 +1,24 @@
 import axios from 'axios';
 
+const isPrivateOrLocalHost = (hostname) => {
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '0.0.0.0' ||
+    /^10\./.test(hostname) ||
+    /^192\.168\./.test(hostname) ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(hostname)
+  );
+};
+
+const resolveRenderApiBase = (hostname) => {
+  if (hostname === 'onlineshop-f0lb.onrender.com') {
+    return 'https://onlineshop-backend.onrender.com/api';
+  }
+
+  return null;
+};
+
 const resolveApiBase = () => {
   const configuredUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
 
@@ -8,12 +27,19 @@ const resolveApiBase = () => {
   }
 
   if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    const isLocalEnvironment = hostname === 'localhost' || hostname === '127.0.0.1';
+    const { protocol, hostname } = window.location;
 
-    if (!isLocalEnvironment) {
-      return '/api';
+    // In local/LAN development, backend runs separately on port 5000.
+    if (isPrivateOrLocalHost(hostname)) {
+      return `${protocol}//${hostname}:5000/api`;
     }
+
+    const renderApiBase = resolveRenderApiBase(hostname);
+    if (renderApiBase) {
+      return renderApiBase;
+    }
+
+    return '/api';
   }
 
   return 'http://localhost:5000/api';
