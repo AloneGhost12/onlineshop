@@ -1,0 +1,13 @@
+const authRoutes = require('./routes/auth');
+console.log('authRoutes loaded');
+const productRoutes = require('./routes/products');
+console.log('productRoutes loaded');
+const cartRoutes = require('./routes/cart');
+console.log('cartRoutes loaded');
+const orderRoutes = require('./routes/orders');
+console.log('orderRoutes loaded');
+const adminRoutes = require('./routes/admin');
+console.log('adminRoutes loaded');
+const categoriesRoutes = require('./routes/categories');
+console.log('categoriesRoutes loaded');
+console.log('All routes loaded successfully');
