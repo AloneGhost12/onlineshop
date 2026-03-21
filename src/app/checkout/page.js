@@ -12,6 +12,20 @@ import Link from 'next/link';
 
 const MERCHANT_UPI_ID = process.env.NEXT_PUBLIC_UPI_ID || 'anp8696@oksbi';
 const MERCHANT_STATIC_QR_PATH = process.env.NEXT_PUBLIC_UPI_QR_URL || '';
+const FALLBACK_PRODUCT_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200';
+
+const normalizeImageUrl = (imageUrl) => {
+  if (typeof imageUrl !== 'string' || !imageUrl.trim()) {
+    return FALLBACK_PRODUCT_IMAGE;
+  }
+
+  const value = imageUrl.trim();
+  if (value.includes('photo-1507473885765-e6ed057ab6fe')) {
+    return FALLBACK_PRODUCT_IMAGE;
+  }
+
+  return value;
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -395,7 +409,7 @@ export default function CheckoutPage() {
                 {cart.items.map((item) => (
                   <div key={item._id} className="flex items-center gap-3 text-sm">
                     <Image
-                      src={item.product?.images?.[0]?.url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200'}
+                      src={normalizeImageUrl(item.product?.images?.[0]?.url)}
                       alt={item.product?.title || 'Cart item'}
                       width={48}
                       height={48}

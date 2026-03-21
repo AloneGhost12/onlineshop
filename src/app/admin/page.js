@@ -5,16 +5,33 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { adminAPI, productAPI } from '@/lib/api';
+import ImageUpload from '@/components/product/ImageUpload';
 import CouponManager from '@/components/admin/CouponManager';
 import UserManagement from '@/components/admin/UserManagement';
 import AdminManagement from '@/components/admin/AdminManagement';
 import SellerManagement from '@/components/admin/SellerManagement';
+import DebugDashboard from '@/components/admin/DebugDashboard';
 import {
   LayoutDashboard, Package, Users, ShoppingBag, DollarSign,
   Plus, Edit, Trash2, Loader2,
-  BarChart3, Eye, Megaphone, TicketPercent, ShieldAlert, ShieldCheck, UserCheck, Ban, Activity, Store
+  BarChart3, Eye, Megaphone, TicketPercent, ShieldAlert, ShieldCheck, UserCheck, Ban, Activity, Store, Bug
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+const FALLBACK_PRODUCT_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200';
+
+const normalizeImageUrl = (imageUrl) => {
+  if (typeof imageUrl !== 'string' || !imageUrl.trim()) {
+    return FALLBACK_PRODUCT_IMAGE;
+  }
+
+  const value = imageUrl.trim();
+  if (value.includes('photo-1507473885765-e6ed057ab6fe')) {
+    return FALLBACK_PRODUCT_IMAGE;
+  }
+
+  return value;
+};
 
 export default function AdminPage() {
   const { user, isAdmin, hasPermission, hasAdminAccess } = useAuth();
@@ -49,8 +66,9 @@ export default function AdminPage() {
       { id: 'sellers', label: 'Sellers', icon: Store, visible: canManageUsers },
       { id: 'coupons', label: 'Coupons', icon: TicketPercent, visible: canManageCoupons },
       { id: 'admins', label: 'Admins', icon: ShieldCheck, visible: canManageAdmins },
+      { id: 'debug', label: 'Debug', icon: Bug, visible: isAdmin },
     ].filter((tab) => tab.visible),
-    [canManageAdmins, canManageCoupons, canManageOrders, canManageProducts, canManageUsers, canViewAnalytics]
+    [canManageAdmins, canManageCoupons, canManageOrders, canManageProducts, canManageUsers, canViewAnalytics, isAdmin]
   );
 
   const firstTabId = tabs[0]?.id || null;
@@ -411,10 +429,11 @@ export default function AdminPage() {
                         <label className="text-sm font-medium text-slate-700">Featured Product</label>
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="text-sm font-medium text-slate-700 mb-1 block">Image URL</label>
-                        <input value={productForm.images[0]?.url || ''} onChange={(e) => setProductForm({ ...productForm, images: [{ url: e.target.value, alt: productForm.title }] })}
-                          placeholder="https://images.unsplash.com/..."
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100" />
+                        <ImageUpload
+                          images={productForm.images}
+                          onChange={(images) => setProductForm({ ...productForm, images })}
+                          maxImages={5}
+                        />
                       </div>
                     </div>
                     <div className="flex gap-3 mt-6">
@@ -446,7 +465,7 @@ export default function AdminPage() {
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-3">
                               <Image
-                                src={prod.images?.[0]?.url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200'}
+                                src={normalizeImageUrl(prod.images?.[0]?.url)}
                                 alt={prod.title}
                                 width={40}
                                 height={40}
@@ -539,6 +558,9 @@ export default function AdminPage() {
 
           {/* ─── Admins Tab ─── */}
           {activeTab === 'admins' && <AdminManagement />}
+
+          {/* ─── Debug Tab ─── */}
+          {activeTab === 'debug' && <DebugDashboard />}
         </>
       )}
     </div>

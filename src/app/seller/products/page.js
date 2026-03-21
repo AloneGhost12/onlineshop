@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import SellerShell from '@/components/seller/SellerShell';
+import ImageUpload from '@/components/product/ImageUpload';
 import { categoryAPI, sellerAPI } from '@/lib/api';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -147,7 +148,13 @@ export default function SellerProductsPage() {
                 <option key={category._id} value={category._id}>{category.name}</option>
               ))}
             </select>
-            <input value={form.images[0]?.url || ''} onChange={(event) => setForm((current) => ({ ...current, images: [{ url: event.target.value, alt: current.title }] }))} placeholder="Image URL" className="md:col-span-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm" />
+            <div className="md:col-span-2">
+              <ImageUpload
+                images={form.images}
+                onChange={(images) => setForm((current) => ({ ...current, images }))}
+                maxImages={5}
+              />
+            </div>
           </div>
           <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
             Commission is set by the platform admin. Current payout rate is shown per product after creation.

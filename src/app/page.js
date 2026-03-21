@@ -36,14 +36,14 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* ─── Hero Section ───────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
+      <section className="relative h-screen overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/3 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-purple-300/20 rounded-full blur-3xl"></div>
           <div className="absolute top-1/2 left-0 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl"></div>
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 z-10">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium mb-6 animate-fade-in">
               <Sparkles className="w-4 h-4" />
@@ -56,7 +56,7 @@ export default function HomePage() {
               </span>
             </h1>
             <p className="text-lg text-white/80 mb-8 leading-relaxed max-w-lg animate-slide-up" style={{animationDelay: '0.1s'}}>
-              Shop the latest trends with unbeatable prices. Free shipping on orders over ₹500. 
+              Shop the latest trends with unbeatable prices. Free shipping on orders over ₹500.
               Secure checkout and fast delivery guaranteed.
             </p>
             <div className="flex flex-wrap gap-4 animate-slide-up" style={{animationDelay: '0.2s'}}>
@@ -173,7 +173,9 @@ export default function HomePage() {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
               {featured.map((product, i) => (
-                <ProductCard key={product._id} product={product} index={i} />
+                <div key={product._id} className="relative group">
+                  <ProductCard product={product} index={i} />
+                </div>
               ))}
             </div>
           )}

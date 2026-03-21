@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { productAPI } from '@/lib/api';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { BadgeCheck, ShoppingCart, Star, Minus, Plus, ChevronRight, Truck, Shield, RefreshCw, Package, Store } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -26,24 +27,96 @@ const normalizeImageUrl = (url) => {
 export default function ProductDetailPage() {
   const params = useParams();
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [reviews, setReviews] = useState([]);
+  const [reviewLoading, setReviewLoading] = useState(true);
+  const [reviewEligibility, setReviewEligibility] = useState(null);
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewForm, setReviewForm] = useState({
+    rating: 5,
+    title: '',
+    comment: '',
+  });
+
+  const loadProduct = async () => {
+    try {
+      const data = await productAPI.getById(params.id);
+      setProduct(data.data);
+    } catch (error) {
+      toast.error('Product not found');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadReviews = async () => {
+    try {
+      setReviewLoading(true);
+      const data = await productAPI.getReviews(params.id, { limit: 20 });
+      setReviews(data.data || []);
+    } catch (error) {
+      setReviews([]);
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
+  const loadReviewEligibility = async () => {
+    if (!user) {
+      setReviewEligibility(null);
+      return;
+    }
+
+    try {
+      const data = await productAPI.getReviewEligibility(params.id);
+      setReviewEligibility(data.data);
+    } catch (error) {
+      setReviewEligibility(null);
+    }
+  };
 
   useEffect(() => {
-    const loadProduct = async () => {
-      try {
-        const data = await productAPI.getById(params.id);
-        setProduct(data.data);
-      } catch (error) {
-        toast.error('Product not found');
-      } finally {
-        setLoading(false);
-      }
-    };
     if (params.id) loadProduct();
   }, [params.id]);
+
+  useEffect(() => {
+    if (params.id) loadReviews();
+  }, [params.id]);
+
+  useEffect(() => {
+    if (params.id) loadReviewEligibility();
+  }, [params.id, user]);
+
+  const handleSubmitReview = async (event) => {
+    event.preventDefault();
+
+    const comment = String(reviewForm.comment || '').trim();
+    if (!comment) {
+      toast.error('Please write a short review comment');
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+      await productAPI.createReview(params.id, {
+        rating: Number(reviewForm.rating),
+        title: reviewForm.title,
+        comment,
+      });
+
+      toast.success('Review submitted successfully');
+      setReviewForm({ rating: 5, title: '', comment: '' });
+      await Promise.all([loadReviews(), loadReviewEligibility(), loadProduct()]);
+    } catch (error) {
+      toast.error(error.message || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -284,6 +357,93 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      <section className="mt-12 border-t border-slate-200 pt-8">
+        <h2 className="text-xl font-bold text-slate-900 mb-5">Customer Reviews</h2>
+
+        {reviewLoading ? (
+          <p className="text-sm text-slate-500">Loading reviews...</p>
+        ) : reviews.length === 0 ? (
+          <p className="text-sm text-slate-500">No reviews yet. Be the first to review this product.</p>
+        ) : (
+          <div className="space-y-4 mb-8">
+            {reviews.map((review) => (
+              <article key={review._id} className="rounded-xl border border-slate-200 bg-white p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <p className="font-semibold text-slate-900">{review.user?.name || 'Verified Buyer'}</p>
+                  <div className="flex items-center gap-1 text-amber-500">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <Star
+                        key={index}
+                        className={`h-4 w-4 ${index < review.rating ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                {review.title ? <p className="text-sm font-semibold text-slate-800 mb-1">{review.title}</p> : null}
+                <p className="text-sm text-slate-600">{review.comment}</p>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {!user ? (
+          <p className="text-sm text-slate-600">
+            Please <Link href="/auth/login" className="text-indigo-600 font-semibold hover:underline">log in</Link> to review this product after purchase.
+          </p>
+        ) : reviewEligibility?.canReview ? (
+          <form onSubmit={handleSubmitReview} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5 space-y-3">
+            <h3 className="text-base font-semibold text-slate-900">Write a Review</h3>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Rating</label>
+              <select
+                value={reviewForm.rating}
+                onChange={(e) => setReviewForm((prev) => ({ ...prev, rating: Number(e.target.value) }))}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              >
+                <option value={5}>5 - Excellent</option>
+                <option value={4}>4 - Good</option>
+                <option value={3}>3 - Average</option>
+                <option value={2}>2 - Poor</option>
+                <option value={1}>1 - Very Poor</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Title (optional)</label>
+              <input
+                type="text"
+                value={reviewForm.title}
+                onChange={(e) => setReviewForm((prev) => ({ ...prev, title: e.target.value }))}
+                maxLength={100}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                placeholder="Summarize your experience"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Comment</label>
+              <textarea
+                value={reviewForm.comment}
+                onChange={(e) => setReviewForm((prev) => ({ ...prev, comment: e.target.value }))}
+                maxLength={1000}
+                rows={4}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                placeholder="Tell other buyers what you liked or disliked"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={submittingReview}
+              className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+            >
+              {submittingReview ? 'Submitting...' : 'Submit Review'}
+            </button>
+          </form>
+        ) : reviewEligibility?.hasReviewed ? (
+          <p className="text-sm text-emerald-700">You already reviewed this product.</p>
+        ) : (
+          <p className="text-sm text-slate-600">You can review this product after it is delivered to you.</p>
+        )}
+      </section>
     </div>
   );
 }

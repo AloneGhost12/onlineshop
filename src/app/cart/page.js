@@ -7,6 +7,21 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ShoppingCart } from 'lucide-react';
 
+const FALLBACK_PRODUCT_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200';
+
+const normalizeImageUrl = (imageUrl) => {
+  if (typeof imageUrl !== 'string' || !imageUrl.trim()) {
+    return FALLBACK_PRODUCT_IMAGE;
+  }
+
+  const value = imageUrl.trim();
+  if (value.includes('photo-1507473885765-e6ed057ab6fe')) {
+    return FALLBACK_PRODUCT_IMAGE;
+  }
+
+  return value;
+};
+
 export default function CartPage() {
   const { cart, updateQuantity, removeItem, loading, applyCoupon } = useCart();
   const { user } = useAuth();
@@ -78,7 +93,7 @@ export default function CartPage() {
               {/* Image */}
               <Link href={`/product/${item.product?._id}`} className="flex-shrink-0">
                 <Image
-                  src={item.product?.images?.[0]?.url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200'}
+                  src={normalizeImageUrl(item.product?.images?.[0]?.url)}
                   alt={item.product?.title}
                   width={112}
                   height={112}
