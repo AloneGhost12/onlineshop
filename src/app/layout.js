@@ -5,6 +5,7 @@ import { CartProvider } from '@/context/CartContext';
 import { SellerAuthProvider } from '@/context/SellerAuthContext';
 import { ScrollProvider } from '@/context/ScrollContext';
 import { DebugProvider } from '@/context/DebugContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import ConditionalNavbar from '@/components/layout/ConditionalNavbar';
 import ConditionalFooter from '@/components/layout/ConditionalFooter';
 import { Toaster } from 'react-hot-toast';
@@ -31,30 +32,32 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen flex flex-col">
-        <DebugProvider>
-          <ScrollProvider>
-            <AuthProvider>
-              <SellerAuthProvider>
-                <CartProvider>
-                  <Toaster
-                    position="bottom-right"
-                    toastOptions={{
-                      duration: 3000,
-                      style: {
-                        borderRadius: '12px',
-                        padding: '12px 16px',
-                      },
-                    }}
-                  />
-                  <ConditionalNavbar />
-                  <main className="flex-1">{children}</main>
-                  <ConditionalFooter />
-                  <Analytics />
-                </CartProvider>
-              </SellerAuthProvider>
-            </AuthProvider>
-          </ScrollProvider>
-        </DebugProvider>
+        <ThemeProvider>
+          <DebugProvider>
+            <ScrollProvider>
+              <AuthProvider>
+                <SellerAuthProvider>
+                  <CartProvider>
+                    <Toaster
+                      position="bottom-right"
+                      toastOptions={{
+                        duration: 3000,
+                        style: {
+                          borderRadius: '12px',
+                          padding: '12px 16px',
+                        },
+                      }}
+                    />
+                    <ConditionalNavbar />
+                    <main className="flex-1">{children}</main>
+                    <ConditionalFooter />
+                    <Analytics />
+                  </CartProvider>
+                </SellerAuthProvider>
+              </AuthProvider>
+            </ScrollProvider>
+          </DebugProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

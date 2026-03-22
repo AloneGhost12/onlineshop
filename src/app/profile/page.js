@@ -5,9 +5,11 @@ import { useAuth } from '@/context/AuthContext';
 import { User, Mail, Phone, MapPin, Save, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function ProfilePage() {
   const { user, updateProfile } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -106,6 +108,25 @@ export default function ProfilePage() {
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> Save Changes</>}
         </button>
       </form>
+
+      <div className="mt-6 rounded-2xl border border-slate-200/60 bg-white p-6">
+        <h3 className="font-bold text-slate-900">Appearance Settings</h3>
+        <p className="mt-1 text-sm text-slate-500">Choose your preferred theme for the app.</p>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className={`mt-4 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+            isDarkMode
+              ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+              : 'bg-slate-900 text-white hover:bg-slate-700'
+          }`}
+        >
+          {isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        </button>
+        <Link href="/settings" className="ml-3 text-sm font-semibold text-indigo-600 hover:underline">
+          Open full settings
+        </Link>
+      </div>
     </div>
   );
 }

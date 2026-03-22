@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { BarChart3, LayoutDashboard, LogOut, Menu, Package, ReceiptText, Store, X } from 'lucide-react';
+import { BarChart3, LayoutDashboard, LogOut, Menu, Package, ReceiptText, Settings, Store, X } from 'lucide-react';
 import { useSellerAuth } from '@/context/SellerAuthContext';
 
 const navigation = [
@@ -11,6 +11,7 @@ const navigation = [
   { href: '/seller/products', label: 'Products', icon: Package },
   { href: '/seller/orders', label: 'Orders', icon: ReceiptText },
   { href: '/seller/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/seller/settings', label: 'Settings', icon: Settings },
 ];
 
 export default function SellerShell({ title, subtitle, children, action }) {

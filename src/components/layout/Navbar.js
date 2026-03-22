@@ -139,6 +139,10 @@ export default function Navbar() {
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                           <User className="w-4 h-4" /> My Profile
                         </Link>
+                        <Link href="/settings" onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                          <LayoutDashboard className="w-4 h-4" /> Settings
+                        </Link>
                         <Link href="/orders" onClick={() => setProfileOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                           <Package className="w-4 h-4" /> My Orders
@@ -249,6 +253,10 @@ export default function Navbar() {
                 <Link href="/profile" onClick={() => setMobileOpen(false)}
                   className="block px-4 py-2.5 text-sm rounded-xl hover:bg-slate-50 transition-colors">
                   My Profile
+                </Link>
+                <Link href="/settings" onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-2.5 text-sm rounded-xl hover:bg-slate-50 transition-colors">
+                  Settings
                 </Link>
                 <Link href="/orders" onClick={() => setMobileOpen(false)}
                   className="block px-4 py-2.5 text-sm rounded-xl hover:bg-slate-50 transition-colors">

@@ -11,10 +11,11 @@ import UserManagement from '@/components/admin/UserManagement';
 import AdminManagement from '@/components/admin/AdminManagement';
 import SellerManagement from '@/components/admin/SellerManagement';
 import DebugDashboard from '@/components/admin/DebugDashboard';
+import { useTheme } from '@/context/ThemeContext';
 import {
   LayoutDashboard, Package, Users, ShoppingBag, DollarSign,
   Plus, Edit, Trash2, Loader2,
-  BarChart3, Eye, Megaphone, TicketPercent, ShieldAlert, ShieldCheck, UserCheck, Ban, Activity, Store, Bug
+  BarChart3, Eye, Megaphone, TicketPercent, ShieldAlert, ShieldCheck, UserCheck, Ban, Activity, Store, Bug, Settings, Moon, Sun
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -35,6 +36,7 @@ const normalizeImageUrl = (imageUrl) => {
 
 export default function AdminPage() {
   const { user, isAdmin, hasPermission, hasAdminAccess } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [dashboard, setDashboard] = useState(null);
   const [products, setProducts] = useState([]);
@@ -66,6 +68,7 @@ export default function AdminPage() {
       { id: 'sellers', label: 'Sellers', icon: Store, visible: canManageUsers },
       { id: 'coupons', label: 'Coupons', icon: TicketPercent, visible: canManageCoupons },
       { id: 'admins', label: 'Admins', icon: ShieldCheck, visible: canManageAdmins },
+      { id: 'settings', label: 'Settings', icon: Settings, visible: true },
       { id: 'debug', label: 'Debug', icon: Bug, visible: isAdmin },
     ].filter((tab) => tab.visible),
     [canManageAdmins, canManageCoupons, canManageOrders, canManageProducts, canManageUsers, canViewAnalytics, isAdmin]
@@ -561,6 +564,27 @@ export default function AdminPage() {
 
           {/* ─── Debug Tab ─── */}
           {activeTab === 'debug' && <DebugDashboard />}
+
+          {/* ─── Settings Tab ─── */}
+          {activeTab === 'settings' && (
+            <div className="animate-fade-in rounded-2xl border border-slate-200/60 bg-white p-6">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Appearance</p>
+              <h3 className="mt-1 text-xl font-bold text-slate-900">Dark mode</h3>
+              <p className="mt-1 text-sm text-slate-500">Control theme preference for the admin workspace.</p>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className={`mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+                  isDarkMode
+                    ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                    : 'bg-slate-900 text-white hover:bg-slate-700'
+                }`}
+              >
+                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {isDarkMode ? 'Switch to Light' : 'Switch to Dark'}
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
