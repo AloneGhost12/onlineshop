@@ -41,6 +41,7 @@ export default function SellerAnalyticsPage() {
   });
 
   const maxRevenue = Math.max(...chartData.map((entry) => entry.revenue), 1);
+  const hasRevenueData = chartData.some((entry) => entry.revenue > 0);
 
   return (
     <SellerShell title="Seller Analytics" subtitle="Understand revenue trends, commissions, and your best-performing products.">
@@ -48,47 +49,57 @@ export default function SellerAnalyticsPage() {
         <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-lg font-semibold text-slate-900">30 Day Seller Revenue</h2>
-            <p className="text-xs text-slate-500">Scroll horizontally on mobile</p>
+            <p className="text-xs text-slate-500">Daily trend with earnings per day</p>
           </div>
 
           {loading ? (
             <div className="mt-6 flex h-64 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 sm:h-72">
               <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
             </div>
-          ) : chartData.length === 0 ? (
+          ) : chartData.length === 0 || !hasRevenueData ? (
             <div className="mt-6 rounded-2xl border border-dashed border-slate-200 px-4 py-10 text-center text-sm text-slate-500">
               No revenue data available yet.
             </div>
           ) : (
-            <div className="mt-5 overflow-x-auto pb-2">
-              <div className="relative min-w-[560px] sm:min-w-[720px]">
-                <div className="absolute inset-0 pointer-events-none">
-                  {[0, 1, 2, 3].map((line) => (
-                    <div
-                      key={line}
-                      className="absolute left-0 right-0 border-t border-slate-100"
-                      style={{ bottom: `${line * 33.33}%` }}
-                    />
-                  ))}
+            <>
+              <div className="mt-4 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+                <div className="rounded-xl bg-emerald-50 px-3 py-2 text-emerald-700">
+                  Max/day: <span className="font-semibold">₹{Math.round(maxRevenue).toLocaleString('en-IN')}</span>
                 </div>
-
-                <div className="flex h-64 items-end gap-1.5 pt-4 sm:h-72 sm:gap-2">
-                  {chartData.map((entry, index) => (
-                    <div key={entry.key} className="flex flex-1 flex-col items-center gap-2">
-                      <div
-                        title={`${entry.dateLabel}: Rs ${Math.round(entry.revenue)}`}
-                        className="w-full rounded-t-2xl bg-gradient-to-t from-emerald-600 to-teal-400"
-                        style={{ height: `${Math.max(10, Math.round((entry.revenue / maxRevenue) * 100))}%` }}
-                      />
-                      <div className="text-center text-[11px] text-slate-500">
-                        <div>{index % 4 === 0 || index === chartData.length - 1 ? entry.dateLabel : ''}</div>
-                        <div className="font-semibold text-slate-700">₹{Math.round(entry.revenue)}</div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="rounded-xl bg-slate-50 px-3 py-2 text-slate-700">
+                  Days shown: <span className="font-semibold">{chartData.length}</span>
+                </div>
+                <div className="col-span-2 rounded-xl bg-sky-50 px-3 py-2 text-sky-700 sm:col-span-1">
+                  Scroll horizontally for full detail
                 </div>
               </div>
-            </div>
+
+              <div className="mt-4 overflow-x-auto pb-2">
+                <div className="h-72 min-w-[760px] rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                  <div className="h-full overflow-hidden rounded-xl bg-[linear-gradient(to_top,rgba(148,163,184,0.16)_1px,transparent_1px)] bg-[length:100%_25%]">
+                    <div className="flex h-full items-end gap-2 px-2">
+                      {chartData.map((entry, index) => {
+                        const barHeightPx = Math.max(14, Math.round((entry.revenue / maxRevenue) * 170));
+
+                        return (
+                          <div key={entry.key} className="flex w-10 flex-col items-center justify-end sm:w-11">
+                            <span className="mb-1 text-[10px] font-semibold text-slate-600">₹{Math.round(entry.revenue)}</span>
+                            <div
+                              title={`${entry.dateLabel}: Rs ${Math.round(entry.revenue)}`}
+                              className="w-full rounded-t-xl bg-gradient-to-t from-emerald-600 to-teal-400 shadow-[0_6px_18px_rgba(16,185,129,0.25)]"
+                              style={{ height: `${barHeightPx}px` }}
+                            />
+                            <span className="mt-1 text-[10px] text-slate-500">
+                              {index % 2 === 0 || index === chartData.length - 1 ? entry.dateLabel : ''}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
         </div>
 
