@@ -13,9 +13,211 @@ const categories = [
   { name: 'Fashion', description: 'Clothing, shoes, and accessories', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400' },
   { name: 'Home & Living', description: 'Furniture, decor, and kitchen essentials', image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400' },
   { name: 'Books', description: 'Fiction, non-fiction, and educational books', image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400' },
-  { name: 'Sports & Fitness', description: 'Exercise equipment and sportswear', image: 'https://images.unsplash.com/photo-1461896836934-bd45ba8fcf9b?w=400' },
+  { name: 'Sports & Fitness', description: 'Exercise equipment and sportswear', image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400' },
   { name: 'Beauty & Health', description: 'Skincare, makeup, and wellness', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400' },
 ];
+
+const DEFAULT_MOCK_PRODUCTS_PER_CATEGORY = 40;
+
+const GLOBAL_MOCK_IMAGE_POOL = [
+  'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600',
+  'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600',
+  'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=600',
+  'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600',
+  'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600',
+  'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600',
+  'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600',
+  'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600',
+  'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600',
+  'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600',
+  'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600',
+  'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600',
+  'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600',
+  'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=600',
+  'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600',
+  'https://images.unsplash.com/photo-1620916297397-a4a5402a3c6c?w=600',
+  'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600',
+  'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600',
+  'https://images.unsplash.com/photo-1445205170230-053b83016050?w=600',
+  'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=600',
+];
+
+const categoryMockConfig = {
+  Electronics: {
+    brands: ['NovaTech', 'PixelWave', 'Nexora', 'ZenByte'],
+    productTypes: ['Smartphone', 'Laptop', 'Bluetooth Earbuds', 'Smartwatch', 'Tablet', 'Gaming Mouse'],
+    images: [
+      'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600',
+      'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600',
+      'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=600',
+      'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600',
+    ],
+    descriptionTemplates: [
+      '{brand} {productType} built for daily performance with reliable battery life and smooth multitasking.',
+      'Upgrade your setup with {brand} {productType}, designed for fast performance and modern connectivity.',
+      '{brand} {productType} offers practical features for work, entertainment, and everyday use.',
+    ],
+    tags: ['electronics', 'gadgets', 'tech'],
+    minPrice: 2499,
+    maxPrice: 129999,
+  },
+  Fashion: {
+    brands: ['UrbanThread', 'StyleMint', 'Velora', 'DailyFit'],
+    productTypes: ['Casual Shirt', 'Slim Fit Jeans', 'Running Shoes', 'Hoodie', 'Kurta Set', 'Backpack'],
+    images: [
+      'https://images.unsplash.com/photo-1445205170230-053b83016050?w=600',
+      'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600',
+      'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600',
+      'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600',
+    ],
+    descriptionTemplates: [
+      'Stay comfortable and stylish with {brand} {productType}, tailored for all-day wear.',
+      '{brand} {productType} combines modern styling with practical comfort for everyday outfits.',
+      'Refresh your wardrobe with {brand} {productType}, made for casual and smart-casual looks.',
+    ],
+    tags: ['fashion', 'style', 'apparel'],
+    minPrice: 499,
+    maxPrice: 8999,
+  },
+  'Home & Living': {
+    brands: ['Nestora', 'OakLoom', 'UrbanNest', 'CozyGrid'],
+    productTypes: ['Coffee Table', 'Wall Shelf', 'Bedside Lamp', 'Dining Chair', 'Curtain Set', 'Storage Rack'],
+    images: [
+      'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=600',
+      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600',
+      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600',
+      'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=600',
+    ],
+    descriptionTemplates: [
+      '{brand} {productType} adds a clean, modern touch to your home with functional design.',
+      'Designed for practical living, {brand} {productType} balances utility and aesthetics.',
+      '{brand} {productType} is ideal for everyday home use with durable materials and finish.',
+    ],
+    tags: ['home', 'living', 'decor'],
+    minPrice: 699,
+    maxPrice: 24999,
+  },
+  Books: {
+    brands: ['PaperLine', 'ReadSphere', 'MindStack', 'Bookverse'],
+    productTypes: ['Self Growth Book', 'Business Book', 'Fiction Novel', 'Biography', 'Productivity Book', 'Startup Guide'],
+    images: [
+      'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=600',
+      'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600',
+      'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600',
+      'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=600',
+    ],
+    descriptionTemplates: [
+      '{brand} {productType} features engaging content for readers looking to learn and grow.',
+      'Dive into {brand} {productType} for practical insights, ideas, and actionable takeaways.',
+      '{brand} {productType} is a reader-friendly pick for building knowledge and perspective.',
+    ],
+    tags: ['books', 'reading', 'learning'],
+    minPrice: 199,
+    maxPrice: 1299,
+  },
+  'Sports & Fitness': {
+    brands: ['FitForge', 'Athletiq', 'CoreMotion', 'PulseGear'],
+    productTypes: ['Resistance Bands', 'Skipping Rope', 'Gym Gloves', 'Protein Shaker', 'Kettlebell', 'Training Shoes'],
+    images: [
+      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600',
+      'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=600',
+      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600',
+      'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=600',
+    ],
+    descriptionTemplates: [
+      '{brand} {productType} supports regular training with comfort, grip, and durability.',
+      'Build your routine with {brand} {productType}, designed for home and gym workouts.',
+      '{brand} {productType} is a practical fitness pick for strength, cardio, and mobility days.',
+    ],
+    tags: ['fitness', 'sports', 'workout'],
+    minPrice: 299,
+    maxPrice: 19999,
+  },
+  'Beauty & Health': {
+    brands: ['PureGlow', 'DermaNest', 'SkinMint', 'WellCore'],
+    productTypes: ['Face Wash', 'Moisturizer', 'Hair Serum', 'Sunscreen', 'Body Lotion', 'Vitamin Supplement'],
+    images: [
+      'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600',
+      'https://images.unsplash.com/photo-1620916297397-a4a5402a3c6c?w=600',
+      'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600',
+      'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600',
+    ],
+    descriptionTemplates: [
+      '{brand} {productType} is made for daily care with a gentle and effective formula.',
+      'Add {brand} {productType} to your routine for balanced care and everyday wellness support.',
+      '{brand} {productType} helps you maintain consistent beauty and personal care habits.',
+    ],
+    tags: ['beauty', 'health', 'wellness'],
+    minPrice: 199,
+    maxPrice: 4999,
+  },
+};
+
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const randomItem = (arr) => arr[randomInt(0, arr.length - 1)];
+const fillTemplate = (template, values) =>
+  template.replace(/\{(\w+)\}/g, (_, key) => values[key] || '');
+const unique = (arr) => [...new Set(arr)];
+const hashString = (input) => String(input || '').split('').reduce((acc, ch) => ((acc * 31) + ch.charCodeAt(0)) >>> 0, 7);
+const pickBySeed = (arr, seed) => {
+  if (!arr?.length) return null;
+  return arr[hashString(seed) % arr.length];
+};
+
+const generateMockProducts = (categoryMap, perCategory = DEFAULT_MOCK_PRODUCTS_PER_CATEGORY) => {
+  const mockProducts = [];
+
+  Object.keys(categoryMap).forEach((categoryName) => {
+    const config = categoryMockConfig[categoryName];
+    if (!config) return;
+
+    for (let i = 1; i <= perCategory; i += 1) {
+      const brand = randomItem(config.brands);
+      const productType = randomItem(config.productTypes);
+      const price = randomInt(config.minPrice, config.maxPrice);
+      const comparePrice = Math.round(price * (1 + randomInt(10, 35) / 100));
+      const rating = Number((Math.random() * 1.4 + 3.5).toFixed(1));
+      const title = `${brand} ${productType} ${i}`;
+      const imagePool = unique([...(config.images || []), ...GLOBAL_MOCK_IMAGE_POOL]);
+      const primaryImage = pickBySeed(imagePool, `${categoryName}:${title}:primary`) || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600';
+      const secondaryCandidates = imagePool.filter((url) => url !== primaryImage);
+      const secondaryImage = secondaryCandidates.length > 0 && Math.random() < 0.65
+        ? pickBySeed(secondaryCandidates, `${categoryName}:${title}:secondary`)
+        : null;
+      const template = pickBySeed(config.descriptionTemplates || ['{brand} {productType} for everyday use.'], `${categoryName}:${title}:template`);
+      const featurePhrases = [
+        'Value-focused pricing',
+        'Top-rated by regular buyers',
+        'Fast-moving marketplace choice',
+        'Popular pick in this category',
+      ];
+      const featureLine = pickBySeed(featurePhrases, `${categoryName}:${title}:feature`);
+      const description = fillTemplate(template, { brand, productType });
+
+      const images = [{ url: primaryImage, alt: `${brand} ${productType}` }];
+      if (secondaryImage) {
+        images.push({ url: secondaryImage, alt: `${brand} ${productType} view 2` });
+      }
+
+      mockProducts.push({
+        title,
+        description: `${description} ${featureLine}. Demo listing generated for catalog browsing and UI testing.`,
+        price,
+        comparePrice,
+        images,
+        category: categoryMap[categoryName],
+        brand,
+        stock: randomInt(5, 300),
+        rating,
+        numReviews: randomInt(0, 1200),
+        featured: Math.random() < 0.12,
+        tags: [...config.tags, productType.toLowerCase().replace(/\s+/g, '-')],
+      });
+    }
+  });
+
+  return mockProducts;
+};
 
 const generateProducts = (categoryMap) => [
   // Electronics
@@ -317,33 +519,63 @@ const seedDatabase = async () => {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    // Clear existing data
-    await User.deleteMany({});
-    await Category.deleteMany({});
-    await Product.deleteMany({});
-    console.log('Cleared existing data');
+    const shouldReset = String(process.env.SEED_RESET || '').toLowerCase() === 'true';
 
-    // Create admin user
-    const admin = await User.create({
-      name: 'Admin User',
-      email: 'admin@shopvault.com',
-      password: 'admin123',
-      role: 'admin',
-    });
-    console.log('Created admin user: admin@shopvault.com / admin123');
+    if (shouldReset) {
+      await User.deleteMany({});
+      await Category.deleteMany({});
+      await Product.deleteMany({});
+      console.log('Cleared existing data (SEED_RESET=true)');
+    } else {
+      console.log('SEED_RESET is false. Preserving existing users, categories, and products.');
+    }
 
-    // Create test user
-    const testUser = await User.create({
-      name: 'John Doe',
-      email: 'john@example.com',
-      password: 'user123',
-      role: 'user',
-    });
-    console.log('Created test user: john@example.com / user123');
+    // Ensure admin user exists
+    const existingAdmin = await User.findOne({ email: 'admin@shopvault.com' });
+    if (!existingAdmin) {
+      await User.create({
+        name: 'Admin User',
+        email: 'admin@shopvault.com',
+        password: 'admin123',
+        role: 'admin',
+      });
+      console.log('Created admin user: admin@shopvault.com / admin123');
+    } else {
+      console.log('Admin user already exists: admin@shopvault.com');
+    }
 
-    // Create categories
-    const createdCategories = await Category.create(categories);
-    console.log(`Created ${createdCategories.length} categories`);
+    // Ensure test user exists
+    const existingTestUser = await User.findOne({ email: 'john@example.com' });
+    if (!existingTestUser) {
+      await User.create({
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'user123',
+        role: 'user',
+      });
+      console.log('Created test user: john@example.com / user123');
+    } else {
+      console.log('Test user already exists: john@example.com');
+    }
+
+    // Ensure categories exist
+    let createdCategories = [];
+    if (shouldReset) {
+      createdCategories = await Category.create(categories);
+      console.log(`Created ${createdCategories.length} categories`);
+    } else {
+      await Promise.all(
+        categories.map((category) =>
+          Category.findOneAndUpdate(
+            { name: category.name },
+            { $setOnInsert: category },
+            { new: true, upsert: true }
+          )
+        )
+      );
+      createdCategories = await Category.find({});
+      console.log(`Loaded ${createdCategories.length} categories`);
+    }
 
     // Build category map
     const categoryMap = {};
@@ -352,9 +584,40 @@ const seedDatabase = async () => {
     });
 
     // Create products
-    const products = generateProducts(categoryMap);
-    const createdProducts = await Product.create(products);
+    const fixedProducts = generateProducts(categoryMap);
+    const perCategory = Number(process.env.MOCK_PRODUCTS_PER_CATEGORY) || DEFAULT_MOCK_PRODUCTS_PER_CATEGORY;
+    const mockProducts = generateMockProducts(categoryMap, perCategory);
+    const products = [...fixedProducts, ...mockProducts];
+
+    let createdProducts = [];
+    let skippedProducts = 0;
+    let updatedProducts = 0;
+
+    if (shouldReset) {
+      createdProducts = await Product.create(products);
+    } else {
+      for (const product of products) {
+        const existingProduct = await Product.findOne({ title: product.title }).select('_id title');
+        if (!existingProduct) {
+          await Product.create(product);
+          createdProducts.push(product);
+        } else {
+          await Product.updateOne({ _id: existingProduct._id }, { $set: product });
+          updatedProducts += 1;
+        }
+      }
+
+      skippedProducts = products.length - createdProducts.length - updatedProducts;
+    }
+
     console.log(`Created ${createdProducts.length} products`);
+    console.log(`  - Fixed products: ${fixedProducts.length}`);
+    console.log(`  - Mock products: ${mockProducts.length}`);
+    console.log(`  - Per category mock count: ${perCategory}`);
+    if (!shouldReset) {
+      console.log(`  - Updated existing products: ${updatedProducts}`);
+      console.log(`  - Skipped existing products: ${skippedProducts}`);
+    }
 
     console.log('\n✅ Database seeded successfully!');
     console.log('\n📋 Login credentials:');

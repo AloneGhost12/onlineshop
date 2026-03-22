@@ -19,6 +19,14 @@ const resolveRenderApiBase = (hostname) => {
   return null;
 };
 
+const resolveVercelApiBase = (hostname) => {
+  if (hostname.endsWith('.vercel.app')) {
+    return 'https://onlineshop-backend.onrender.com/api';
+  }
+
+  return null;
+};
+
 const resolveApiBase = () => {
   const configuredUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
 
@@ -37,6 +45,11 @@ const resolveApiBase = () => {
     const renderApiBase = resolveRenderApiBase(hostname);
     if (renderApiBase) {
       return renderApiBase;
+    }
+
+    const vercelApiBase = resolveVercelApiBase(hostname);
+    if (vercelApiBase) {
+      return vercelApiBase;
     }
 
     return '/api';
