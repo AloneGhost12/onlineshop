@@ -1,22 +1,18 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { orderAPI } from '@/lib/api';
-import { Package, MapPin, CreditCard, CheckCircle, Loader2, ArrowLeft, Ban, Truck, Download, Printer } from 'lucide-react';
+import { Package, MapPin, CreditCard, CheckCircle, Loader2, ArrowLeft, Ban, Truck } from 'lucide-react';
 import toast from 'react-hot-toast';
-import AddressLabel from '@/components/orders/AddressLabel';
-import { generateAddressLabelPDF } from '@/lib/pdfGenerator';
 
 export default function OrderDetailPage() {
   const params = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
-  const [downloadingPDF, setDownloadingPDF] = useState(false);
-  const addressLabelRef = useRef(null);
 
   const canCancelOrder = (status) => ['pending', 'confirmed', 'processing'].includes(String(status || '').toLowerCase());
 
@@ -64,24 +60,6 @@ export default function OrderDetailPage() {
     }
   };
 
-  const handleDownloadLabel = async () => {
-    if (!addressLabelRef.current) {
-      toast.error('Address label element not found');
-      return;
-    }
-
-    setDownloadingPDF(true);
-    try {
-      await generateAddressLabelPDF(addressLabelRef.current, order.orderNumber);
-      toast.success('Address label downloaded successfully');
-    } catch (error) {
-      console.error('PDF download error:', error);
-      toast.error(error.message || 'Failed to download address label');
-    } finally {
-      setDownloadingPDF(false);
-    }
-  };
-
   useEffect(() => {
     const loadOrder = async () => {
       try {
@@ -116,16 +94,6 @@ export default function OrderDetailPage() {
           }`}>
             {order.status}
           </span>
-          <button
-            type="button"
-            onClick={handleDownloadLabel}
-            disabled={downloadingPDF}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50 transition-colors"
-            title="Download delivery address as PDF for printing"
-          >
-            <Download className="w-4 h-4" />
-            {downloadingPDF ? 'Downloading...' : 'Download Label'}
-          </button>
           {canCancelOrder(order.status) && (
             <button
               type="button"
@@ -229,11 +197,6 @@ export default function OrderDetailPage() {
             <p className="font-bold text-slate-900">₹{(item.price * item.quantity).toLocaleString('en-IN')}</p>
           </div>
         ))}
-      </div>
-
-      {/* Hidden Address Label for PDF Generation */}
-      <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-        <AddressLabel ref={addressLabelRef} order={order} />
       </div>
     </div>
   );

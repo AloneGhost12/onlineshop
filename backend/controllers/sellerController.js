@@ -526,6 +526,7 @@ exports.deleteSellerProduct = async (req, res, next) => {
 exports.getSellerOrders = async (req, res, next) => {
   try {
     const orders = await Order.find({ 'items.sellerId': req.seller._id })
+      .populate('user', 'name email phone')
       .sort('-createdAt')
       .lean();
 
