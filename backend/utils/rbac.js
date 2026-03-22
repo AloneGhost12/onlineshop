@@ -60,12 +60,7 @@ const getEffectivePermissions = (role, permissions = []) => {
     return explicitPermissions;
   }
 
-  const rawRole = String(role || '').trim();
-  if (rawRole && rawRole === rawRole.toLowerCase()) {
-    return getDefaultPermissions(rawRole);
-  }
-
-  return [];
+  return getDefaultPermissions(role);
 };
 
 const hasPermission = (user, permission) => {
