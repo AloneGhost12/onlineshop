@@ -84,8 +84,6 @@ const sellerSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       default: null,
-      index: true,
-      sparse: true,
     },
     applicationSource: {
       type: String,
