@@ -22,7 +22,7 @@ Use defaults:
 Add these in Vercel Project Settings -> Environment Variables:
 
 - `NEXT_PUBLIC_API_URL` = your backend base URL + `/api`
-  - Example: `https://onlineshop-backend.onrender.com/api`
+  - Example: `https://onlineshop-f0lb.onrender.com/api`
 
 Optional (if used in your app):
 - `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`

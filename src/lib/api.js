@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+const RENDER_API_BASE = 'https://onlineshop-f0lb.onrender.com/api';
+
 const isPrivateOrLocalHost = (hostname) => {
   return (
     hostname === 'localhost' ||
@@ -13,7 +15,7 @@ const isPrivateOrLocalHost = (hostname) => {
 
 const resolveRenderApiBase = (hostname) => {
   if (hostname === 'onlineshop-f0lb.onrender.com') {
-    return 'https://onlineshop-backend.onrender.com/api';
+    return RENDER_API_BASE;
   }
 
   return null;
@@ -21,7 +23,7 @@ const resolveRenderApiBase = (hostname) => {
 
 const resolveVercelApiBase = (hostname) => {
   if (hostname.endsWith('.vercel.app')) {
-    return 'https://onlineshop-backend.onrender.com/api';
+    return RENDER_API_BASE;
   }
 
   return null;
