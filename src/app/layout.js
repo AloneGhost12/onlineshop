@@ -5,8 +5,8 @@ import { CartProvider } from '@/context/CartContext';
 import { SellerAuthProvider } from '@/context/SellerAuthContext';
 import { ScrollProvider } from '@/context/ScrollContext';
 import { DebugProvider } from '@/context/DebugContext';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import ConditionalNavbar from '@/components/layout/ConditionalNavbar';
+import ConditionalFooter from '@/components/layout/ConditionalFooter';
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from '@vercel/analytics/next';
 
@@ -46,9 +46,9 @@ export default function RootLayout({ children }) {
                       },
                     }}
                   />
-                  <Navbar />
+                  <ConditionalNavbar />
                   <main className="flex-1">{children}</main>
-                  <Footer />
+                  <ConditionalFooter />
                   <Analytics />
                 </CartProvider>
               </SellerAuthProvider>

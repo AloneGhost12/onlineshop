@@ -42,6 +42,7 @@ export default function SellerAnalyticsPage() {
 
   const maxRevenue = Math.max(...chartData.map((entry) => entry.revenue), 1);
   const hasRevenueData = chartData.some((entry) => entry.revenue > 0);
+  const compactChart = chartData.length > 0 && chartData.length <= 7;
 
   return (
     <SellerShell title="Seller Analytics" subtitle="Understand revenue trends, commissions, and your best-performing products.">
@@ -75,22 +76,22 @@ export default function SellerAnalyticsPage() {
               </div>
 
               <div className="mt-4 overflow-x-auto pb-2">
-                <div className="h-72 min-w-[760px] rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <div className={`h-72 rounded-2xl border border-slate-200 bg-slate-50 p-3 ${compactChart ? 'min-w-full' : 'min-w-[760px]'}`}>
                   <div className="h-full overflow-hidden rounded-xl bg-[linear-gradient(to_top,rgba(148,163,184,0.16)_1px,transparent_1px)] bg-[length:100%_25%]">
-                    <div className="flex h-full items-end gap-2 px-2">
+                    <div className={`flex h-full items-end px-2 ${compactChart ? 'justify-center gap-4' : 'gap-2'}`}>
                       {chartData.map((entry, index) => {
-                        const barHeightPx = Math.max(14, Math.round((entry.revenue / maxRevenue) * 170));
+                        const barHeightPx = Math.max(18, Math.round((entry.revenue / maxRevenue) * 170));
 
                         return (
-                          <div key={entry.key} className="flex w-10 flex-col items-center justify-end sm:w-11">
-                            <span className="mb-1 text-[10px] font-semibold text-slate-600">₹{Math.round(entry.revenue)}</span>
+                          <div key={entry.key} className={`flex flex-col items-center justify-end ${compactChart ? 'w-14 sm:w-16' : 'w-10 sm:w-11'}`}>
+                            <span className="mb-1 text-[11px] font-semibold text-slate-600">₹{Math.round(entry.revenue)}</span>
                             <div
                               title={`${entry.dateLabel}: Rs ${Math.round(entry.revenue)}`}
                               className="w-full rounded-t-xl bg-gradient-to-t from-emerald-600 to-teal-400 shadow-[0_6px_18px_rgba(16,185,129,0.25)]"
                               style={{ height: `${barHeightPx}px` }}
                             />
-                            <span className="mt-1 text-[10px] text-slate-500">
-                              {index % 2 === 0 || index === chartData.length - 1 ? entry.dateLabel : ''}
+                            <span className="mt-1 text-[11px] text-slate-500">
+                              {compactChart || index % 2 === 0 || index === chartData.length - 1 ? entry.dateLabel : ''}
                             </span>
                           </div>
                         );
