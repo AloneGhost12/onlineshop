@@ -184,8 +184,9 @@ export default function UserManagement() {
             <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <>
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
                   <th className="text-left py-3 px-4 font-semibold text-slate-600">Email</th>
@@ -289,7 +290,89 @@ export default function UserManagement() {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+
+            <div className="space-y-3 p-3 md:hidden">
+              {users.map((user) => (
+                <div key={user._id} className="rounded-2xl border border-slate-200 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900 break-all">{user.email}</p>
+                      <p className="text-xs text-slate-500">{user.name}</p>
+                    </div>
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${statusPill(user)}`}>
+                      {statusText(user)}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 space-y-1 text-xs text-slate-600">
+                    <p>IP: {user.activity?.ipAddress || '-'}</p>
+                    <p>Device: {user.activity ? `${user.activity.device} / ${user.activity.browser} / ${user.activity.os}` : '-'}</p>
+                    <p>Location: {user.activity ? `${user.activity.city}, ${user.activity.country}` : '-'}</p>
+                    <p>Last login: {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : '-'}</p>
+                    <p>Orders: {user.orderCount || 0}</p>
+                  </div>
+
+                  <div className="mt-3">
+                    {hasPermission('MANAGE_ADMINS') ? (
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={roleDrafts[user._id] || user.role}
+                          onChange={(event) => setRoleDrafts((current) => ({ ...current, [user._id]: event.target.value }))}
+                          disabled={user._id === currentUser?._id}
+                          className="flex-1 rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-300"
+                        >
+                          {assignableRoles.map((role) => (
+                            <option key={role} value={role}>{role}</option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => saveRole(user)}
+                          disabled={user._id === currentUser?._id || roleLoading === user._id || (roleDrafts[user._id] || user.role) === user.role}
+                          className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 disabled:opacity-40"
+                        >
+                          {roleLoading === user._id ? 'Saving' : 'Save'}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs font-semibold text-slate-700">Role: {user.role}</span>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => loadSessionHistory(user, 'all', 1)}
+                      disabled={historyLoading && historyUser?._id === user._id}
+                      className="rounded-lg border border-sky-200 px-3 py-2 text-xs font-semibold text-sky-700 disabled:opacity-40"
+                    >
+                      Sessions
+                    </button>
+                    <button
+                      onClick={() => applyAction(user, 'block')}
+                      disabled={actionLoading === `${user._id}-block` || user.isBanned}
+                      className="rounded-lg border border-amber-200 px-3 py-2 text-xs font-semibold text-amber-700 disabled:opacity-40"
+                    >
+                      Block
+                    </button>
+                    <button
+                      onClick={() => applyAction(user, 'unblock')}
+                      disabled={actionLoading === `${user._id}-unblock`}
+                      className="rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700 disabled:opacity-40"
+                    >
+                      Unblock
+                    </button>
+                    <button
+                      onClick={() => applyAction(user, 'ban')}
+                      disabled={actionLoading === `${user._id}-ban`}
+                      className="rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 disabled:opacity-40"
+                    >
+                      Ban
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

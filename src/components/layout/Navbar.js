@@ -189,6 +189,13 @@ export default function Navbar() {
                   Create Seller Account
                 </Link>
                 <Link
+                  href="/auth/register"
+                  className="px-4 py-2.5 text-sm font-semibold text-indigo-700 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-all"
+                  id="nav-register"
+                >
+                  Sign Up
+                </Link>
+                <Link
                   href="/auth/login"
                   className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all"
                   id="nav-login"
@@ -236,14 +243,61 @@ export default function Navbar() {
               className="block px-4 py-2.5 text-sm rounded-xl hover:bg-slate-50 transition-colors">
               Cart {cart.itemCount > 0 && `(${cart.itemCount})`}
             </Link>
-            <Link href="/seller/register" onClick={() => setMobileOpen(false)}
-              className="block px-4 py-2.5 text-sm rounded-xl hover:bg-slate-50 transition-colors">
-              Create Seller Account
-            </Link>
-            <Link href="/seller/login" onClick={() => setMobileOpen(false)}
-              className="block px-4 py-2.5 text-sm rounded-xl hover:bg-slate-50 transition-colors">
-              Seller Login
-            </Link>
+
+            {user ? (
+              <>
+                <Link href="/profile" onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-2.5 text-sm rounded-xl hover:bg-slate-50 transition-colors">
+                  My Profile
+                </Link>
+                <Link href="/orders" onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-2.5 text-sm rounded-xl hover:bg-slate-50 transition-colors">
+                  My Orders
+                </Link>
+                {isAdmin && (
+                  <Link href="/admin" onClick={() => setMobileOpen(false)}
+                    className="block px-4 py-2.5 text-sm rounded-xl text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors font-medium">
+                    Admin Panel
+                  </Link>
+                )}
+                {canAccessSellerHubFromUserMenu ? (
+                  <Link href="/seller/dashboard" onClick={() => setMobileOpen(false)}
+                    className="block px-4 py-2.5 text-sm rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors font-medium">
+                    Seller Hub
+                  </Link>
+                ) : (
+                  <Link href="/seller/register" onClick={() => setMobileOpen(false)}
+                    className="block px-4 py-2.5 text-sm rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors font-medium">
+                    Create Seller Account
+                  </Link>
+                )}
+                <button
+                  onClick={() => { logout(); setMobileOpen(false); }}
+                  className="block w-full text-left px-4 py-2.5 text-sm rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/register" onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-2.5 text-sm rounded-xl text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors font-medium">
+                  Sign Up
+                </Link>
+                <Link href="/auth/login" onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-2.5 text-sm rounded-xl text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transition-colors font-medium">
+                  Sign In
+                </Link>
+                <Link href="/seller/register" onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-2.5 text-sm rounded-xl hover:bg-slate-50 transition-colors">
+                  Create Seller Account
+                </Link>
+                <Link href="/seller/login" onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-2.5 text-sm rounded-xl hover:bg-slate-50 transition-colors">
+                  Seller Login
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -86,13 +86,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Demo credentials */}
-          <div className="p-3 bg-indigo-50 rounded-xl text-xs text-indigo-700 space-y-1">
-            <p className="font-semibold">Demo Credentials:</p>
-            <p>Admin: admin@shopvault.com / admin123</p>
-            <p>User: john@example.com / user123</p>
-          </div>
-
           <button
             type="submit"
             disabled={loading}

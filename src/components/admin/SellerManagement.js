@@ -77,8 +77,9 @@ export default function SellerManagement() {
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <>
+          <div className="hidden overflow-x-auto md:block">
+            <table className="w-full text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="px-4 py-3 text-left font-semibold">Seller</th>
@@ -181,7 +182,71 @@ export default function SellerManagement() {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+
+          <div className="space-y-3 p-3 md:hidden">
+            {sellers.map((seller) => (
+              <div key={seller._id} className="rounded-2xl border border-slate-200 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">{seller.sellerName}</p>
+                    <p className="text-xs text-slate-500 break-all">{seller.email}</p>
+                    <p className="text-xs text-slate-400">{seller.phone}</p>
+                  </div>
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${badgeClass(seller)}`}>
+                    {badgeText(seller)}
+                  </span>
+                </div>
+
+                <div className="mt-3 space-y-1 text-xs text-slate-600">
+                  <p>Store: <span className="font-medium text-slate-700">{seller.storeName}</span></p>
+                  <p>Joined: {new Date(seller.createdAt).toLocaleDateString()}</p>
+                  <p>Source: {String(seller.applicationSource || 'direct').replace('_', ' ')}</p>
+                  <p>Products: {seller.activeProductCount} active / {seller.productCount} total</p>
+                  <p>Revenue: ₹{seller.totalRevenue?.toLocaleString('en-IN') || 0}</p>
+                  <p>Orders: {seller.totalOrders}</p>
+                  {seller.isSuspended && seller.suspensionReason && (
+                    <p>Reason: {seller.suspensionReason}</p>
+                  )}
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  {seller.moderationHistory?.slice(0, 2).map((entry) => (
+                    <div key={entry._id || `${seller._id}-${entry.createdAt}-${entry.action}`} className="rounded-xl border border-slate-100 bg-slate-50 p-2.5 text-xs text-slate-600">
+                      <p className="font-semibold text-slate-800">{actionText(entry.action)}</p>
+                      <p>{new Date(entry.createdAt).toLocaleString()}</p>
+                      <p>By {entry.performedBy?.name || entry.performedBy?.email || 'Admin'}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => applyAction(seller, seller.isVerified ? 'unverify' : 'verify')}
+                    disabled={actionLoading === `${seller._id}-verify` || actionLoading === `${seller._id}-unverify`}
+                    className="rounded-xl border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700 disabled:opacity-50"
+                  >
+                    {seller.isVerified ? 'Unverify' : 'Verify'}
+                  </button>
+                  <button
+                    onClick={() => applyAction(seller, seller.isSuspended ? 'unsuspend' : 'suspend')}
+                    disabled={actionLoading === `${seller._id}-suspend` || actionLoading === `${seller._id}-unsuspend`}
+                    className="rounded-xl border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 disabled:opacity-50"
+                  >
+                    {seller.isSuspended ? 'Unsuspend' : 'Suspend'}
+                  </button>
+                  <button
+                    onClick={() => applyAction(seller, 'revert')}
+                    disabled={actionLoading === `${seller._id}-revert`}
+                    className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 disabled:opacity-50"
+                  >
+                    Revert
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

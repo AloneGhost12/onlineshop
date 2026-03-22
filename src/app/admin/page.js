@@ -182,19 +182,19 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <LayoutDashboard className="w-6 h-6 text-indigo-600" /> Admin Panel
           </h1>
           <p className="text-slate-500 text-sm mt-1">Manage your store with role-based access and permission-aware controls</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-wrap items-stretch gap-3 lg:w-auto lg:justify-end">
           {canManageCoupons && (
             <Link
               href="/admin/promotions"
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 shadow-sm transition-colors hover:bg-amber-100"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 shadow-sm transition-colors hover:bg-amber-100"
             >
               <Megaphone className="h-4 w-4" /> Promotions
             </Link>
@@ -202,12 +202,12 @@ export default function AdminPage() {
           {canManageUsers && (
             <Link
               href="/admin/fraud-monitor"
-              className="inline-flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 shadow-sm transition-colors hover:bg-rose-100"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 shadow-sm transition-colors hover:bg-rose-100"
             >
               <ShieldAlert className="h-4 w-4" /> Fraud Monitor
             </Link>
           )}
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-right shadow-sm">
+          <div className="min-h-11 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm sm:text-right">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Signed in as</p>
             <p className="mt-1 text-sm font-semibold text-slate-900">{user.role}</p>
           </div>
@@ -215,7 +215,7 @@ export default function AdminPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+      <div className="mb-8 flex gap-2 overflow-x-auto pb-2">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -238,7 +238,7 @@ export default function AdminPage() {
           {/* ─── Dashboard Tab ─── */}
           {activeTab === 'dashboard' && dashboard && (
             <div className="space-y-8 animate-fade-in">
-              <div className="grid grid-cols-2 xl:grid-cols-8 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8">
                 {[
                   { label: 'Total Users', value: dashboard.stats.totalUsers, icon: Users, tone: 'bg-sky-50 text-sky-700' },
                   { label: 'Total Sellers', value: dashboard.stats.totalSellers, icon: Store, tone: 'bg-teal-50 text-teal-700' },
@@ -317,16 +317,16 @@ export default function AdminPage() {
               </div>
 
               {/* Recent Orders */}
-              <div className="bg-white rounded-2xl border border-slate-200/60 p-6">
+              <div className="bg-white rounded-2xl border border-slate-200/60 p-4 sm:p-6">
                 <h3 className="font-bold text-slate-900 mb-4">Recent Orders</h3>
                 <div className="space-y-3">
                   {dashboard.recentOrders?.slice(0, 5).map((order) => (
-                    <div key={order._id} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-0">
+                    <div key={order._id} className="flex flex-col gap-2 py-3 border-b border-slate-50 last:border-0 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <p className="text-sm font-medium text-slate-800">{order.orderNumber}</p>
                         <p className="text-xs text-slate-500">{order.user?.name || 'Unknown'} • {new Date(order.createdAt).toLocaleDateString()}</p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-left sm:text-right">
                         <p className="text-sm font-bold">₹{order.totalPrice?.toLocaleString('en-IN')}</p>
                         <span className={`text-xs font-medium capitalize px-2 py-0.5 rounded-full ${
                           order.status === 'delivered' ? 'bg-green-100 text-green-700' :
@@ -347,7 +347,7 @@ export default function AdminPage() {
                   </h3>
                   <div className="space-y-3">
                     {dashboard.topProducts.map((prod, i) => (
-                      <div key={prod._id} className="flex items-center gap-3">
+                      <div key={prod._id} className="flex flex-wrap items-center gap-2 sm:gap-3">
                         <span className="text-sm font-bold text-slate-400 w-6">#{i + 1}</span>
                         <div className="flex-1">
                           <p className="text-sm font-medium text-slate-800">{prod.title}</p>
@@ -365,11 +365,11 @@ export default function AdminPage() {
           {/* ─── Products Tab ─── */}
           {activeTab === 'products' && (
             <div className="animate-fade-in">
-              <div className="flex justify-between items-center mb-6">
+              <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-slate-500">{products.length} products</p>
                 <button
                   onClick={() => { setShowProductForm(true); setEditingId(null); setProductForm({ title: '', description: '', price: '', comparePrice: '', stock: '', category: '', brand: '', featured: false, commissionPercentage: '', images: [{ url: '', alt: '' }] }); }}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/25"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/25"
                 >
                   <Plus className="w-4 h-4" /> Add Product
                 </button>
@@ -436,9 +436,9 @@ export default function AdminPage() {
                         />
                       </div>
                     </div>
-                    <div className="flex gap-3 mt-6">
-                      <button onClick={() => setShowProductForm(false)} className="px-6 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors">Cancel</button>
-                      <button onClick={handleSaveProduct} className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
+                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                      <button onClick={() => setShowProductForm(false)} className="w-full sm:w-auto px-6 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors">Cancel</button>
+                      <button onClick={handleSaveProduct} className="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
                         {editingId ? 'Update Product' : 'Create Product'}
                       </button>
                     </div>
