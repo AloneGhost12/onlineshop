@@ -19,11 +19,14 @@ export default function ImageUpload({ images = [], onChange, maxImages = 5 }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
   const [uploadingIndices, setUploadingIndices] = useState(new Set());
-  const cloudName = String(process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '').trim();
-  const uploadPreset = String(process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '').trim();
+  // Fallback values keep uploads working if deployment env vars are missing.
+  const fallbackCloudName = 'dtzhskby3';
+  const fallbackUploadPreset = 'default';
+  const cloudName = String(process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || fallbackCloudName).trim();
+  const uploadPreset = String(process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || fallbackUploadPreset).trim();
   const isCloudinaryConfigured =
-    cloudName &&
-    uploadPreset &&
+    cloudName.length > 0 &&
+    uploadPreset.length > 0 &&
     !cloudName.includes('your_') &&
     !uploadPreset.includes('your_');
 
