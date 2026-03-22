@@ -80,12 +80,13 @@ export default function SellerAnalyticsPage() {
                         className="w-full rounded-t-2xl bg-gradient-to-t from-emerald-600 to-teal-400"
                         style={{ height: `${Math.max(10, Math.round((entry.revenue / maxRevenue) * 100))}%` }}
                       />
-                    <div className="text-center text-[11px] text-slate-500">
-                      <div>{index % 4 === 0 || index === chartData.length - 1 ? entry.dateLabel : ''}</div>
-                      <div className="font-semibold text-slate-700">₹{Math.round(entry.revenue)}</div>
+                      <div className="text-center text-[11px] text-slate-500">
+                        <div>{index % 4 === 0 || index === chartData.length - 1 ? entry.dateLabel : ''}</div>
+                        <div className="font-semibold text-slate-700">₹{Math.round(entry.revenue)}</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           )}
