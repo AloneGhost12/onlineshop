@@ -38,12 +38,12 @@ export default function SellerOrdersPage() {
             </div>
             <div className="mt-4 space-y-3">
               {(order.items || []).map((item) => (
-                <div key={`${order._id}-${item.product}`} className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                <div key={`${order._id}-${item.product}`} className="flex flex-col gap-2 rounded-2xl bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-medium text-slate-900">{item.title}</p>
                     <p className="text-xs text-slate-500">Qty {item.quantity} • Commission {item.commissionPercentage}%</p>
                   </div>
-                  <div className="text-right text-sm">
+                  <div className="text-left text-sm sm:text-right">
                     <div className="font-semibold text-slate-900">₹{item.sellerRevenue?.toLocaleString('en-IN') || 0}</div>
                     <div className="text-xs text-slate-500">Platform ₹{item.platformRevenue?.toLocaleString('en-IN') || 0}</div>
                   </div>

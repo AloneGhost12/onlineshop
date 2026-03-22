@@ -127,7 +127,7 @@ export default function SellerProductsPage() {
       title="Seller Products"
       subtitle="Create, edit, and manage stock for products owned by your store."
       action={
-        <button onClick={() => { setShowForm(true); setEditingId(null); setForm(emptyForm); }} className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white">
+        <button onClick={() => { setShowForm(true); setEditingId(null); setForm(emptyForm); }} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white sm:w-auto">
           <Plus className="h-4 w-4" />
           Add product
         </button>
@@ -159,15 +159,15 @@ export default function SellerProductsPage() {
           <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
             Commission is set by the platform admin. Current payout rate is shown per product after creation.
           </p>
-          <div className="mt-5 flex gap-3">
-            <button type="button" onClick={() => setShowForm(false)} className="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700">Cancel</button>
-            <button type="submit" className="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white">{editingId ? 'Update Product' : 'Create Product'}</button>
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <button type="button" onClick={() => setShowForm(false)} className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 sm:w-auto">Cancel</button>
+            <button type="submit" className="w-full rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white sm:w-auto">{editingId ? 'Update Product' : 'Create Product'}</button>
           </div>
         </form>
       )}
 
       <div className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
@@ -198,6 +198,26 @@ export default function SellerProductsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        <div className="space-y-3 p-3 md:hidden">
+          {products.map((product) => (
+            <div key={product._id} className="rounded-2xl border border-slate-200 p-4">
+              <p className="text-sm font-semibold text-slate-900">{product.title}</p>
+              <p className="mt-1 text-xs text-slate-500">{product.category?.name || product.category}</p>
+
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                <p>Price: <span className="font-semibold text-slate-800">₹{product.price?.toLocaleString('en-IN')}</span></p>
+                <p>Stock: <span className="font-semibold text-slate-800">{product.stock}</span></p>
+                <p>Commission: <span className="font-semibold text-slate-800">{product.commissionPercentage}%</span></p>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button onClick={() => startEdit(product)} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700">Edit</button>
+                <button onClick={() => removeProduct(product._id)} className="rounded-xl border border-red-200 px-3 py-2 text-xs font-semibold text-red-600">Delete</button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </SellerShell>

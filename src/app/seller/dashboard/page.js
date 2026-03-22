@@ -47,7 +47,7 @@ export default function SellerDashboardPage() {
           <div className="mt-4 space-y-3">
             {(data?.recentOrders || []).slice(0, 5).map((order) => (
               <div key={order._id} className="rounded-2xl border border-slate-100 p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-medium text-slate-900">{order.orderNumber}</p>
                     <p className="text-xs text-slate-500">{new Date(order.createdAt).toLocaleString()}</p>
@@ -63,7 +63,7 @@ export default function SellerDashboardPage() {
           <h2 className="text-lg font-semibold text-slate-900">Low Stock Products</h2>
           <div className="mt-4 space-y-3">
             {(data?.lowStockProducts || []).map((product) => (
-              <div key={product._id} className="flex items-center justify-between rounded-2xl border border-slate-100 p-4">
+              <div key={product._id} className="flex flex-col gap-2 rounded-2xl border border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-medium text-slate-900">{product.title}</p>
                   <p className="text-xs text-slate-500">Commission {product.commissionPercentage}%</p>

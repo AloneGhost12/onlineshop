@@ -28,16 +28,18 @@ export default function SellerAnalyticsPage() {
       <div className="grid gap-6 xl:grid-cols-[1.6fr,1fr]">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900">30 Day Seller Revenue</h2>
-          <div className="mt-6 flex h-72 items-end gap-2">
-            {analytics.dailyRevenue.map((entry) => (
-              <div key={entry._id} className="flex flex-1 flex-col items-center gap-2">
-                <div className="w-full rounded-t-2xl bg-gradient-to-t from-emerald-600 to-teal-400" style={{ height: `${Math.max(10, Math.round((entry.revenue / maxRevenue) * 100))}%` }} />
-                <div className="text-center text-[11px] text-slate-500">
-                  <div>{entry._id.slice(5)}</div>
-                  <div className="font-semibold text-slate-700">₹{Math.round(entry.revenue)}</div>
+          <div className="mt-6 overflow-x-auto">
+            <div className="flex h-72 min-w-[720px] items-end gap-2">
+              {analytics.dailyRevenue.map((entry) => (
+                <div key={entry._id} className="flex flex-1 flex-col items-center gap-2">
+                  <div className="w-full rounded-t-2xl bg-gradient-to-t from-emerald-600 to-teal-400" style={{ height: `${Math.max(10, Math.round((entry.revenue / maxRevenue) * 100))}%` }} />
+                  <div className="text-center text-[11px] text-slate-500">
+                    <div>{entry._id.slice(5)}</div>
+                    <div className="font-semibold text-slate-700">₹{Math.round(entry.revenue)}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
