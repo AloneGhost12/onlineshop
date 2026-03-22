@@ -65,6 +65,8 @@ export default function AdminManagement() {
     ? STAFF_ROLES
     : STAFF_ROLES.filter((role) => role !== 'SUPER_ADMIN');
 
+  const editableMemberRoles = ['USER', ...assignableStaffRoles];
+
   const updateDraft = (userId, updater) => {
     setDrafts((current) => ({
       ...current,
@@ -183,7 +185,7 @@ export default function AdminManagement() {
                         disabled={member._id === user?._id}
                         className="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 disabled:opacity-60"
                       >
-                        {assignableStaffRoles.map((role) => (
+                        {editableMemberRoles.map((role) => (
                           <option key={role} value={role}>{role}</option>
                         ))}
                       </select>
