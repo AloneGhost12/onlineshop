@@ -30,6 +30,15 @@ const orderItemSchema = new mongoose.Schema({
     default: 0,
     min: 0,
   },
+  sellerDeliveryStatus: {
+    type: String,
+    enum: ['pending', 'delivered'],
+    default: 'pending',
+  },
+  sellerDeliveredAt: {
+    type: Date,
+    default: null,
+  },
   title: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true, min: 1 },

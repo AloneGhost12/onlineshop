@@ -17,19 +17,21 @@ export default function SellerOrdersPage() {
   const labelRefs = useRef({});
 
   const filteredOrders = orders.filter((order) => {
+    const sellerStatus = order.sellerDeliveryStatus || (order.status === 'delivered' ? 'delivered' : 'pending');
+
     if (statusFilter === 'all') {
       return true;
     }
 
     if (statusFilter === 'delivered') {
-      return order.status === 'delivered';
+      return sellerStatus === 'delivered';
     }
 
-    return order.status !== 'delivered';
+    return sellerStatus !== 'delivered';
   });
 
   const handleToggleDelivered = async (order) => {
-    const isDelivered = order.status === 'delivered';
+    const isDelivered = (order.sellerDeliveryStatus || (order.status === 'delivered' ? 'delivered' : 'pending')) === 'delivered';
 
     setUpdatingOrderId(order._id);
     try {
@@ -103,7 +105,7 @@ export default function SellerOrdersPage() {
               : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
           }`}
         >
-          Delivered ({orders.filter((order) => order.status === 'delivered').length})
+          Delivered ({orders.filter((order) => (order.sellerDeliveryStatus || (order.status === 'delivered' ? 'delivered' : 'pending')) === 'delivered').length})
         </button>
         <button
           type="button"
@@ -114,12 +116,15 @@ export default function SellerOrdersPage() {
               : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
           }`}
         >
-          Not Delivered ({orders.filter((order) => order.status !== 'delivered').length})
+          Not Delivered ({orders.filter((order) => (order.sellerDeliveryStatus || (order.status === 'delivered' ? 'delivered' : 'pending')) !== 'delivered').length})
         </button>
       </div>
 
       <div className="space-y-4">
         {filteredOrders.map((order) => (
+          (() => {
+            const sellerStatus = order.sellerDeliveryStatus || (order.status === 'delivered' ? 'delivered' : 'pending');
+            return (
           <div key={order._id} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -135,7 +140,7 @@ export default function SellerOrdersPage() {
                 <div>Items: <span className="font-semibold">{(order.items || []).length}</span></div>
                 <div className="mt-1">
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
-                    {order.status || 'pending'}
+                    {sellerStatus}
                   </span>
                 </div>
               </div>
@@ -173,7 +178,7 @@ export default function SellerOrdersPage() {
                   >
                     {updatingOrderId === order._id
                       ? 'Updating...'
-                      : order.status === 'delivered'
+                      : sellerStatus === 'delivered'
                         ? 'Mark as Not Delivered'
                         : 'Mark as Delivered'}
                   </button>
@@ -229,6 +234,8 @@ export default function SellerOrdersPage() {
               }} order={order} />
             </div>
           </div>
+            );
+          })()
         ))}
 
         {filteredOrders.length === 0 && (

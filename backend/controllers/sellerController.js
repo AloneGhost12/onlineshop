@@ -34,6 +34,16 @@ const mapSellerOrder = (order, sellerId) => {
   const sellerSubtotal = sellerItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const sellerRevenue = sellerItems.reduce((sum, item) => sum + (item.sellerRevenue || 0), 0);
   const platformRevenue = sellerItems.reduce((sum, item) => sum + (item.platformRevenue || 0), 0);
+  const deliveredSellerItems = sellerItems.filter(
+    (item) => item.sellerDeliveryStatus === 'delivered' || (!item.sellerDeliveryStatus && order.status === 'delivered')
+  );
+  const sellerDeliveryStatus = sellerItems.length > 0 && deliveredSellerItems.length === sellerItems.length
+    ? 'delivered'
+    : 'pending';
+  const sellerDeliveredAt = deliveredSellerItems
+    .map((item) => item.sellerDeliveredAt)
+    .filter(Boolean)
+    .sort((a, b) => new Date(b) - new Date(a))[0] || null;
 
   return {
     ...order,
@@ -41,6 +51,8 @@ const mapSellerOrder = (order, sellerId) => {
     sellerSubtotal,
     sellerRevenue,
     platformRevenue,
+    sellerDeliveryStatus,
+    sellerDeliveredAt,
   };
 };
 
@@ -545,7 +557,6 @@ exports.getSellerOrders = async (req, res, next) => {
 exports.updateSellerOrderDeliveryStatus = async (req, res, next) => {
   try {
     const delivered = Boolean(req.body?.delivered);
-    const nextStatus = delivered ? 'delivered' : 'processing';
 
     const order = await Order.findOne({
       _id: req.params.id,
@@ -556,8 +567,26 @@ exports.updateSellerOrderDeliveryStatus = async (req, res, next) => {
       return next(ApiError.notFound('Order not found for this seller'));
     }
 
-    order.status = nextStatus;
-    order.deliveredAt = delivered ? new Date() : null;
+    const deliveryTimestamp = delivered ? new Date() : null;
+    order.items.forEach((item) => {
+      if (item.sellerId && String(item.sellerId) === String(req.seller._id)) {
+        item.sellerDeliveryStatus = delivered ? 'delivered' : 'pending';
+        item.sellerDeliveredAt = deliveryTimestamp;
+      }
+    });
+
+    const allSellerItemsDelivered = (order.items || [])
+      .filter((item) => item.sellerId)
+      .every((item) => item.sellerDeliveryStatus === 'delivered');
+
+    if (allSellerItemsDelivered) {
+      order.status = 'delivered';
+      order.deliveredAt = order.deliveredAt || new Date();
+    } else if (order.status === 'delivered') {
+      order.status = 'processing';
+      order.deliveredAt = null;
+    }
+
     await order.save();
 
     const refreshedOrder = await Order.findById(order._id)
