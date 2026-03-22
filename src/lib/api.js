@@ -242,6 +242,7 @@ export const sellerAPI = {
   updateProduct: (id, data) => sellerApi.patch(`/seller/products/${id}`, data),
   deleteProduct: (id) => sellerApi.delete(`/seller/products/${id}`),
   getOrders: () => sellerApi.get('/seller/orders'),
+  updateOrderDeliveryStatus: (id, delivered) => sellerApi.patch(`/seller/orders/${id}/delivery-status`, { delivered }),
   getAnalytics: () => sellerApi.get('/seller/analytics'),
 };
 

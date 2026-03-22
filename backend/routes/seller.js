@@ -14,6 +14,7 @@ const {
   updateSellerProduct,
   deleteSellerProduct,
   getSellerOrders,
+  updateSellerOrderDeliveryStatus,
   getSellerAnalytics,
   logoutSeller,
 } = require('../controllers/sellerController');
@@ -80,6 +81,11 @@ const productUpdateValidation = [
   validateRequest,
 ];
 
+const updateDeliveryStatusValidation = [
+  body('delivered').isBoolean().withMessage('Delivered must be true or false'),
+  validateRequest,
+];
+
 router.post('/register', authLimiter, sellerValidation, registerSeller);
 router.post('/login', authLimiter, sellerLoginValidation, loginSeller);
 router.post('/forgot-password', authLimiter, forgotPasswordValidation, forgotSellerPassword);
@@ -97,6 +103,7 @@ router.post('/products', productValidation, createSellerProduct);
 router.patch('/products/:id', productUpdateValidation, updateSellerProduct);
 router.delete('/products/:id', deleteSellerProduct);
 router.get('/orders', getSellerOrders);
+router.patch('/orders/:id/delivery-status', updateDeliveryStatusValidation, updateSellerOrderDeliveryStatus);
 router.get('/analytics', getSellerAnalytics);
 
 module.exports = router;

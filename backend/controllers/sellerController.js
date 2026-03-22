@@ -539,6 +539,41 @@ exports.getSellerOrders = async (req, res, next) => {
   }
 };
 
+// @desc    Toggle delivery status for seller order
+// @route   PATCH /api/seller/orders/:id/delivery-status
+// @access  Private Seller
+exports.updateSellerOrderDeliveryStatus = async (req, res, next) => {
+  try {
+    const delivered = Boolean(req.body?.delivered);
+    const nextStatus = delivered ? 'delivered' : 'processing';
+
+    const order = await Order.findOne({
+      _id: req.params.id,
+      'items.sellerId': req.seller._id,
+    });
+
+    if (!order) {
+      return next(ApiError.notFound('Order not found for this seller'));
+    }
+
+    order.status = nextStatus;
+    order.deliveredAt = delivered ? new Date() : null;
+    await order.save();
+
+    const refreshedOrder = await Order.findById(order._id)
+      .populate('user', 'name email phone')
+      .lean();
+
+    res.json({
+      success: true,
+      message: delivered ? 'Order marked as delivered' : 'Order marked as not delivered',
+      data: mapSellerOrder(refreshedOrder, req.seller._id),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get seller analytics
 // @route   GET /api/seller/analytics
 // @access  Private Seller
