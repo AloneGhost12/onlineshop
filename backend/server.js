@@ -255,8 +255,6 @@ const toSlug = (value) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 
-const buildSeedProductSlug = (title) => `${toSlug(title)}-seed`;
-
 const ensureCatalogSeeded = async () => {
   // Can be disabled explicitly if a project wants to manage data externally.
   if (String(process.env.AUTO_SEED_CATALOG || 'true').toLowerCase() === 'false') {
@@ -273,15 +271,6 @@ const ensureCatalogSeeded = async () => {
   }
 
   logger.warn('Catalog is empty. Ensuring default categories and products exist.');
-
-  // Repair earlier bootstrap rows that may have null slugs.
-  const productsWithNullSlug = await Product.find({ slug: null }).select('_id title').lean();
-  for (const product of productsWithNullSlug) {
-    await Product.updateOne(
-      { _id: product._id },
-      { $set: { slug: `${toSlug(product.title)}-${String(product._id).slice(-6)}` } }
-    );
-  }
 
   await Promise.all(
     defaultCategories.map((category) => {
@@ -326,14 +315,9 @@ const ensureCatalogSeeded = async () => {
 
   let createdProducts = 0;
   for (const product of productsToCreate) {
-    const productWithSlug = {
-      ...product,
-      slug: buildSeedProductSlug(product.title),
-    };
-
     const result = await Product.updateOne(
       { title: product.title },
-      { $setOnInsert: productWithSlug },
+      { $setOnInsert: product },
       { upsert: true }
     );
 
