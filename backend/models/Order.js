@@ -56,6 +56,12 @@ const orderSchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
+    dataPartition: {
+      type: String,
+      enum: ['live', 'seed'],
+      default: 'live',
+      index: true,
+    },
     items: [orderItemSchema],
     subtotal: {
       type: Number,

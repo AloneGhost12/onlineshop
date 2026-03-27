@@ -32,6 +32,12 @@ const userSchema = new mongoose.Schema(
       default: ROLES.USER,
       set: (value) => normalizeRole(value),
     },
+    dataPartition: {
+      type: String,
+      enum: ['live', 'seed'],
+      default: 'live',
+      index: true,
+    },
     permissions: {
       type: [String],
       default: [],

@@ -22,6 +22,7 @@ const adminRoutes = require('./routes/admin');
 const sellerRoutes = require('./routes/seller');
 const promotionRoutes = require('./routes/promotionRoutes');
 const fraudRoutes = require('./routes/fraudRoutes');
+const mailboxRoutes = require('./routes/mailbox');
 const User = require('./models/User');
 
 const app = express();
@@ -142,6 +143,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/seller', sellerRoutes);
+app.use('/api/mailbox', mailboxRoutes);
 app.use('/api', promotionRoutes);
 app.use('/api/admin/fraud', fraudRoutes);
 

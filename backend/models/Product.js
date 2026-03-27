@@ -63,6 +63,12 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    dataPartition: {
+      type: String,
+      enum: ['live', 'seed'],
+      default: 'live',
+      index: true,
+    },
     isActive: {
       type: Boolean,
       default: true,

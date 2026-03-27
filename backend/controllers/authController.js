@@ -54,6 +54,7 @@ exports.register = async (req, res, next) => {
       name,
       email,
       password,
+      dataPartition: 'live',
       referral: {
         referredBy,
       },

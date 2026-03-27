@@ -533,10 +533,19 @@ const seedDatabase = async () => {
     }
 
     if (shouldReset) {
-      await User.deleteMany({});
-      await Category.deleteMany({});
-      await Product.deleteMany({});
-      console.log('Cleared existing data (SEED_RESET=true)');
+      const forceResetAll = String(process.env.FORCE_RESET_ALL || '').toLowerCase() === 'true';
+
+      if (forceResetAll) {
+        await User.deleteMany({});
+        await Category.deleteMany({});
+        await Product.deleteMany({});
+        console.log('Cleared ALL existing data (SEED_RESET=true and FORCE_RESET_ALL=true)');
+      } else {
+        await User.deleteMany({ dataPartition: 'seed' });
+        await Category.deleteMany({ dataPartition: 'seed' });
+        await Product.deleteMany({ dataPartition: 'seed' });
+        console.log('Cleared only seed partition data (SEED_RESET=true)');
+      }
     } else {
       console.log('SEED_RESET is false. Preserving existing users, categories, and products.');
     }
@@ -549,6 +558,7 @@ const seedDatabase = async () => {
         email: 'admin@shopvault.com',
         password: 'admin123',
         role: 'admin',
+        dataPartition: 'seed',
       });
       console.log('Created admin user: admin@shopvault.com / admin123');
     } else {
@@ -563,6 +573,7 @@ const seedDatabase = async () => {
         email: 'john@example.com',
         password: 'user123',
         role: 'user',
+        dataPartition: 'seed',
       });
       console.log('Created test user: john@example.com / user123');
     } else {
@@ -572,14 +583,17 @@ const seedDatabase = async () => {
     // Ensure categories exist
     let createdCategories = [];
     if (shouldReset) {
-      createdCategories = await Category.create(categories);
+      createdCategories = await Category.create(categories.map((category) => ({
+        ...category,
+        dataPartition: 'seed',
+      })));
       console.log(`Created ${createdCategories.length} categories`);
     } else {
       await Promise.all(
         categories.map((category) =>
           Category.findOneAndUpdate(
             { name: category.name },
-            { $setOnInsert: category },
+            { $setOnInsert: { ...category, dataPartition: 'seed' } },
             { new: true, upsert: true }
           )
         )
@@ -605,15 +619,19 @@ const seedDatabase = async () => {
     let updatedProducts = 0;
 
     if (shouldReset) {
-      createdProducts = await Product.create(products);
+      createdProducts = await Product.create(products.map((product) => ({
+        ...product,
+        dataPartition: 'seed',
+      })));
     } else {
       for (const product of products) {
         const existingProduct = await Product.findOne({ title: product.title }).select('_id title');
         if (!existingProduct) {
-          await Product.create(product);
-          createdProducts.push(product);
+          const seedProduct = { ...product, dataPartition: 'seed' };
+          await Product.create(seedProduct);
+          createdProducts.push(seedProduct);
         } else {
-          await Product.updateOne({ _id: existingProduct._id }, { $set: product });
+          await Product.updateOne({ _id: existingProduct._id }, { $set: { ...product, dataPartition: 'seed' } });
           updatedProducts += 1;
         }
       }
