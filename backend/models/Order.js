@@ -159,6 +159,38 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    loyaltyPointsEarned: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    referral: {
+      referralCodeUsed: {
+        type: String,
+        uppercase: true,
+        trim: true,
+        default: '',
+      },
+      referrerUserId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null,
+      },
+      rewardGranted: {
+        type: Boolean,
+        default: false,
+      },
+      referrerRewardPoints: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      refereeRewardPoints: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+    },
     clientInfo: {
       ipAddress: { type: String, default: '' },
       device: { type: String, default: 'unknown' },

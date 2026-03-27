@@ -3,6 +3,7 @@ const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Coupon = require('../models/Coupon');
 const Seller = require('../models/Seller');
+const User = require('../models/User');
 const ApiError = require('../utils/apiError');
 const {
   ensureCouponUsable,
@@ -15,6 +16,15 @@ const {
 } = require('../utils/fraudDetection');
 const { calculateCommissionBreakdown, round2 } = require('../services/commissionService');
 const { calculatePromotionsForItems, recordPromotionUsage } = require('../services/promotionEngine');
+
+const LOYALTY_POINTS_PER_100_INR = 5;
+const REFERRER_REWARD_POINTS = 150;
+const REFEREE_REWARD_POINTS = 100;
+
+const calculateEarnedPoints = (totalPrice) => {
+  const total = Number(totalPrice || 0);
+  return Math.max(0, Math.floor(total / 100) * LOYALTY_POINTS_PER_100_INR);
+};
 
 // @desc    Create order from cart
 // @route   POST /api/orders
@@ -30,10 +40,12 @@ exports.createOrder = async (req, res, next) => {
       paymentResult,
       paymentId = '',
       notes = '',
+      referralCode = '',
     } = req.body;
 
     const normalizedPaymentMethod = String(paymentMethod || '').trim().toLowerCase();
     const normalizedPaymentId = String(paymentId || '').trim();
+    const normalizedReferralCode = String(referralCode || '').trim().toUpperCase();
 
     if (normalizedPaymentMethod === 'upi' && !normalizedPaymentId) {
       return next(ApiError.badRequest('UPI transaction/reference ID is required'));
@@ -219,8 +231,67 @@ exports.createOrder = async (req, res, next) => {
       paymentId: normalizedPaymentId,
       clientInfo: fraudReview.clientInfo,
       notes,
+      loyaltyPointsEarned: 0,
       expectedDeliveryAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
     });
+
+    const customer = await User.findById(req.user._id);
+    let referrer = null;
+
+    if (customer) {
+      const earnedPoints = calculateEarnedPoints(totalPrice);
+      if (earnedPoints > 0) {
+        customer.loyalty = customer.loyalty || {};
+        customer.loyalty.points = Number(customer.loyalty.points || 0) + earnedPoints;
+        customer.loyalty.lifetimePoints = Number(customer.loyalty.lifetimePoints || 0) + earnedPoints;
+        customer.refreshLoyaltyTier();
+        order.loyaltyPointsEarned = earnedPoints;
+      }
+
+      const canApplyReferralCode = !customer.referral?.referredBy && normalizedReferralCode;
+      if (canApplyReferralCode) {
+        referrer = await User.findOne({
+          'referral.code': normalizedReferralCode,
+          _id: { $ne: customer._id },
+        });
+
+        if (referrer) {
+          customer.referral = customer.referral || {};
+          customer.referral.referredBy = referrer._id;
+
+          if (!customer.referral.rewardGranted) {
+            customer.referral.rewardGranted = true;
+            customer.loyalty.points = Number(customer.loyalty.points || 0) + REFEREE_REWARD_POINTS;
+            customer.loyalty.lifetimePoints = Number(customer.loyalty.lifetimePoints || 0) + REFEREE_REWARD_POINTS;
+            customer.loyalty.totalReferralBonus = Number(customer.loyalty.totalReferralBonus || 0) + REFEREE_REWARD_POINTS;
+            customer.refreshLoyaltyTier();
+
+            referrer.loyalty = referrer.loyalty || {};
+            referrer.referral = referrer.referral || {};
+            referrer.loyalty.points = Number(referrer.loyalty.points || 0) + REFERRER_REWARD_POINTS;
+            referrer.loyalty.lifetimePoints = Number(referrer.loyalty.lifetimePoints || 0) + REFERRER_REWARD_POINTS;
+            referrer.loyalty.totalReferralBonus = Number(referrer.loyalty.totalReferralBonus || 0) + REFERRER_REWARD_POINTS;
+            referrer.referral.successfulReferrals = Number(referrer.referral.successfulReferrals || 0) + 1;
+            referrer.referral.totalReferralRewards = Number(referrer.referral.totalReferralRewards || 0) + REFERRER_REWARD_POINTS;
+            referrer.refreshLoyaltyTier();
+
+            order.referral = {
+              referralCodeUsed: normalizedReferralCode,
+              referrerUserId: referrer._id,
+              rewardGranted: true,
+              referrerRewardPoints: REFERRER_REWARD_POINTS,
+              refereeRewardPoints: REFEREE_REWARD_POINTS,
+            };
+          }
+        }
+      }
+
+      await customer.save();
+      if (referrer) {
+        await referrer.save();
+      }
+      await order.save();
+    }
 
     // Update product stock
     for (const item of orderItems) {

@@ -31,7 +31,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 // @access  Public
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, referralCode } = req.body;
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
@@ -39,7 +39,25 @@ exports.register = async (req, res, next) => {
       return next(ApiError.badRequest('Email is already registered'));
     }
 
-    const user = await User.create({ name, email, password });
+    const normalizedReferralCode = String(referralCode || '').trim().toUpperCase();
+    let referredBy = null;
+
+    if (normalizedReferralCode) {
+      const referrer = await User.findOne({ 'referral.code': normalizedReferralCode }).select('_id');
+      if (!referrer) {
+        return next(ApiError.badRequest('Invalid referral code'));
+      }
+      referredBy = referrer._id;
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      referral: {
+        referredBy,
+      },
+    });
     sendTokenResponse(user, 201, res);
   } catch (error) {
     next(error);
@@ -111,7 +129,37 @@ exports.login = async (req, res, next) => {
 exports.getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
+    if (user && !user.referral?.code) {
+      await user.save();
+    }
     res.json({ success: true, user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get loyalty and referral summary
+// @route   GET /api/auth/loyalty
+// @access  Private
+exports.getLoyaltySummary = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select('name loyalty referral');
+    if (user && !user.referral?.code) {
+      await user.save();
+    }
+    const frontendBaseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+    res.json({
+      success: true,
+      data: {
+        name: user?.name || '',
+        loyalty: user?.loyalty || {},
+        referral: user?.referral || {},
+        referralLink: user?.referral?.code
+          ? `${frontendBaseUrl}/auth/register?ref=${encodeURIComponent(user.referral.code)}`
+          : '',
+      },
+    });
   } catch (error) {
     next(error);
   }

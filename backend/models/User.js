@@ -98,17 +98,92 @@ const userSchema = new mongoose.Schema(
       default: null,
       select: false,
     },
+    loyalty: {
+      points: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      lifetimePoints: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      tier: {
+        type: String,
+        enum: ['bronze', 'silver', 'gold', 'platinum'],
+        default: 'bronze',
+      },
+      totalReferralBonus: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+    },
+    referral: {
+      code: {
+        type: String,
+        uppercase: true,
+        trim: true,
+        unique: true,
+        sparse: true,
+        index: true,
+      },
+      referredBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null,
+        index: true,
+      },
+      rewardGranted: {
+        type: Boolean,
+        default: false,
+      },
+      successfulReferrals: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+      totalReferralRewards: {
+        type: Number,
+        default: 0,
+        min: 0,
+      },
+    },
   },
   {
     timestamps: true,
   }
 );
 
+const getLoyaltyTier = (lifetimePoints) => {
+  const points = Number(lifetimePoints || 0);
+  if (points >= 2500) return 'platinum';
+  if (points >= 1200) return 'gold';
+  if (points >= 500) return 'silver';
+  return 'bronze';
+};
+
+const generateReferralCode = (userId) => {
+  const suffix = String(userId || '').slice(-6).toUpperCase();
+  return `SV${suffix}`;
+};
+
 // Hash password before saving
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
+});
+
+userSchema.pre('save', function () {
+  if (!this.referral?.code) {
+    this.referral = this.referral || {};
+    this.referral.code = generateReferralCode(this._id);
+  }
+
+  this.loyalty = this.loyalty || {};
+  this.loyalty.tier = getLoyaltyTier(this.loyalty.lifetimePoints);
 });
 
 // Compare password method
@@ -140,6 +215,11 @@ userSchema.methods.getResetPasswordToken = function () {
   this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
 
   return resetToken;
+};
+
+userSchema.methods.refreshLoyaltyTier = function () {
+  this.loyalty = this.loyalty || {};
+  this.loyalty.tier = getLoyaltyTier(this.loyalty.lifetimePoints);
 };
 
 // Remove sensitive data from JSON
