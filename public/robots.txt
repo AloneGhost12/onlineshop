@@ -1,0 +1,37 @@
+# ShopVault - robots.txt
+# Helps search engines crawl and index the site efficiently
+
+User-agent: *
+Allow: /
+
+# Disallow admin and auth pages from search results
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /profile/
+Disallow: /settings/
+Disallow: /*.json$
+Disallow: /?*sort=
+Disallow: /?*page=
+Disallow: /*?*
+
+# Allow specific query parameters that are important for SEO
+Allow: /?category=
+Allow: /?search=
+
+# Crawl delay to avoid overwhelming the server
+Crawl-delay: 1
+
+# Sitemap location (critical for SEO)
+Sitemap: https://shopvault.com/sitemap.xml
+Sitemap: https://shopvault.com/sitemap-products.xml
+Sitemap: https://shopvault.com/sitemap-categories.xml
+
+# Additional search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /

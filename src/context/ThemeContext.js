@@ -7,16 +7,13 @@ const THEME_STORAGE_KEY = 'shopvault-theme';
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('light');
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    const storedTheme = typeof window !== 'undefined' ? localStorage.getItem(THEME_STORAGE_KEY) : null;
-    const initialTheme = storedTheme === 'dark' ? 'dark' : 'light';
-
-    setTheme(initialTheme);
-    setIsReady(true);
-  }, []);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') {
+      return 'light';
+    }
+    return localStorage.getItem(THEME_STORAGE_KEY) === 'dark' ? 'dark' : 'light';
+  });
+  const isReady = true;
 
   useEffect(() => {
     if (!isReady || typeof document === 'undefined') {

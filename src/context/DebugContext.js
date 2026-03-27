@@ -138,6 +138,8 @@ export function DebugProvider({ children }) {
 
   // Check WebGL support on mount
   useEffect(() => {
+    let timeoutId;
+
     try {
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('webgl2');
@@ -148,33 +150,41 @@ export function DebugProvider({ children }) {
         const renderer = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : 'Unknown';
         const version = gl.getParameter(gl.VERSION);
 
-        setWebglStatus({
+        const nextStatus = {
           available: true,
           vendor,
           renderer,
           version,
           errors: [],
-        });
+        };
+        timeoutId = setTimeout(() => setWebglStatus(nextStatus), 0);
       } else {
-        setWebglStatus({
+        const nextStatus = {
           available: false,
           vendor: '',
           renderer: '',
           version: '',
           errors: ['WebGL is not supported in this browser'],
-        });
+        };
+        timeoutId = setTimeout(() => setWebglStatus(nextStatus), 0);
       }
     } catch (error) {
-      addError(error, 'WEBGL_ERROR');
-      setWebglStatus({
+      const nextStatus = {
         available: false,
         vendor: '',
         renderer: '',
         version: '',
         errors: [error.message],
-      });
+      };
+      timeoutId = setTimeout(() => setWebglStatus(nextStatus), 0);
     }
-  }, [addError]);
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
 
   const value = {
     errors,

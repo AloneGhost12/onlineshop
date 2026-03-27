@@ -1,0 +1,26 @@
+# .browserlistrc
+# Defines target browsers for transpilation and polyfills
+# Used by autoprefixer, babel, etc. to determine what CSS prefixes and JS features to include
+
+# Support modern browsers (90%+ of traffic)
+last 2 major versions
+
+# Support last 2 years of browser releases
+last 2 years
+
+# Don't support dead browsers
+not dead
+
+# Exclude browsers with <0.5% market share
+> 0.5%
+
+# Specific browser requirements
+not IE 11
+not op_mini all
+
+# Production browser matrix:
+# Chrome/Edge: Latest 2 versions
+# Firefox: Latest 2 versions  
+# Safari: Latest 2 versions
+# Mobile Safari (iOS): Latest 2 versions
+# Chrome Mobile: Latest 2 versions

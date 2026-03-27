@@ -5,6 +5,11 @@ import { useRef, useMemo, memo } from 'react';
 import { useScroll } from '@/context/ScrollContext';
 import * as THREE from 'three';
 
+function seededUnit(seed) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
 function ParticleSystem({ scrollVelocity, scrollPercentage }) {
   const pointsRef = useRef(null);
   const particleCount = 100;
@@ -14,14 +19,15 @@ function ParticleSystem({ scrollVelocity, scrollPercentage }) {
     const col = new Float32Array(particleCount * 3);
 
     for (let i = 0; i < particleCount; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 10;
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 10;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 5;
+      const baseSeed = i + 1;
+      pos[i * 3] = (seededUnit(baseSeed * 11) - 0.5) * 10;
+      pos[i * 3 + 1] = (seededUnit(baseSeed * 13) - 0.5) * 10;
+      pos[i * 3 + 2] = (seededUnit(baseSeed * 17) - 0.5) * 5;
 
       // Color variation
-      const hue = 0.6 + Math.random() * 0.2;
-      const saturation = 0.6 + Math.random() * 0.2;
-      const lightness = 0.5 + Math.random() * 0.2;
+      const hue = 0.6 + seededUnit(baseSeed * 19) * 0.2;
+      const saturation = 0.6 + seededUnit(baseSeed * 23) * 0.2;
+      const lightness = 0.5 + seededUnit(baseSeed * 29) * 0.2;
       const color = new THREE.Color().setHSL(hue, saturation, lightness);
 
       col[i * 3] = color.r;

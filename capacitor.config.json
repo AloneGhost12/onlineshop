@@ -1,0 +1,9 @@
+{
+  "appId": "com.shopvault.app",
+  "appName": "ShopVault",
+  "webDir": "public",
+  "server": {
+    "url": "https://your-frontend-domain.vercel.app",
+    "cleartext": false
+  }
+}

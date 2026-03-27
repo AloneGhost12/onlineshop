@@ -14,9 +14,13 @@ const nextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 365, // 1 year for versioned images
   },
 
-  // ✅ React & Browser Settings
+  // ✅ Code Splitting & Performance
+  swcMinify: true, // Faster minification with Rust
   reactStrictMode: true,
   productionBrowserSourceMaps: false, // Reduce bundle size
+  
+  // ✅ Compression
+  compress: true,
   
   // ✅ Redirects & Headers for SEO
   async redirects() {
@@ -65,7 +69,13 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', '@react-three/fiber'],
   },
+
+  // ✅ Logging for build optimization
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
 };
 
 export default nextConfig;
-

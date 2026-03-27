@@ -1,17 +1,12 @@
 'use client';
 
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useRef, useEffect, memo } from 'react';
+import { useRef, memo } from 'react';
 import { useScroll } from '@/context/ScrollContext';
 import * as THREE from 'three';
 
 function RotatingBoxMesh({ scrollVelocity, index }) {
   const meshRef = useRef(null);
-  const initialRotation = useRef([
-    Math.random() * Math.PI,
-    Math.random() * Math.PI,
-    Math.random() * Math.PI,
-  ]);
 
   useFrame(() => {
     if (!meshRef.current) return;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -42,7 +42,7 @@ export default function ProductDetailPage() {
     comment: '',
   });
 
-  const loadProduct = async () => {
+  const loadProduct = useCallback(async () => {
     try {
       const data = await productAPI.getById(params.id);
       setProduct(data.data);
@@ -51,9 +51,9 @@ export default function ProductDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id]);
 
-  const loadReviews = async () => {
+  const loadReviews = useCallback(async () => {
     try {
       setReviewLoading(true);
       const data = await productAPI.getReviews(params.id, { limit: 20 });
@@ -63,9 +63,9 @@ export default function ProductDetailPage() {
     } finally {
       setReviewLoading(false);
     }
-  };
+  }, [params.id]);
 
-  const loadReviewEligibility = async () => {
+  const loadReviewEligibility = useCallback(async () => {
     if (!user) {
       setReviewEligibility(null);
       return;
@@ -77,19 +77,19 @@ export default function ProductDetailPage() {
     } catch (error) {
       setReviewEligibility(null);
     }
-  };
+  }, [params.id, user]);
 
   useEffect(() => {
     if (params.id) loadProduct();
-  }, [params.id]);
+  }, [params.id, loadProduct]);
 
   useEffect(() => {
     if (params.id) loadReviews();
-  }, [params.id]);
+  }, [params.id, loadReviews]);
 
   useEffect(() => {
     if (params.id) loadReviewEligibility();
-  }, [params.id, user]);
+  }, [params.id, loadReviewEligibility]);
 
   const handleSubmitReview = async (event) => {
     event.preventDefault();
