@@ -27,6 +27,7 @@ const fraudRoutes = require('./routes/fraudRoutes');
 const mailboxRoutes = require('./routes/mailbox');
 const Category = require('./models/Category');
 const Product = require('./models/Product');
+const User = require('./models/User');
 
 const app = express();
 
@@ -342,6 +343,25 @@ const ensureCatalogSeeded = async () => {
   logger.success(`Default catalog ensured (${categories.length} categories available, ${createdProducts} products created in this boot).`);
 };
 
+const ensureDefaultUser = async () => {
+  if (String(process.env.AUTO_SEED_DEMO_USER || 'true').toLowerCase() === 'false') {
+    return;
+  }
+
+  const demoEmail = 'john@example.com';
+  const existingUser = await User.findOne({ email: demoEmail }).select('_id');
+
+  if (!existingUser) {
+    await User.create({
+      name: 'John Doe',
+      email: demoEmail,
+      password: 'user123',
+      role: 'user',
+    });
+    logger.warn('Created default demo user (john@example.com).');
+  }
+};
+
 // Public categories route
 app.get('/api/categories', async (req, res, next) => {
   try {
@@ -369,6 +389,7 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await connectDB();
+    await ensureDefaultUser();
     await ensureCatalogSeeded();
     app.listen(PORT, () => {
       logger.success(`Server running on port ${PORT}`);

@@ -69,18 +69,19 @@ exports.register = async (req, res, next) => {
 // @access  Public
 exports.login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const normalizedEmail = String(req.body?.email || '').trim().toLowerCase();
+    const password = String(req.body?.password || '');
 
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return next(ApiError.badRequest('Please provide email and password'));
     }
 
     // Find user and include password for comparison
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
     if (!user) {
       await recordFailedLoginAttempt({
         req,
-        email,
+        email: normalizedEmail,
         reason: 'Login attempted with an unknown email address',
       });
       return next(ApiError.unauthorized('Invalid email or password'));
@@ -103,7 +104,7 @@ exports.login = async (req, res, next) => {
       await recordFailedLoginAttempt({
         req,
         userId: user._id,
-        email,
+        email: normalizedEmail,
         reason: 'Incorrect password provided',
       });
       return next(ApiError.unauthorized('Invalid email or password'));
