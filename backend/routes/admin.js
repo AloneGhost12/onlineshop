@@ -22,6 +22,7 @@ const {
   updateCoupon,
   deleteCoupon,
   assignCoupon,
+  broadcastMailboxMessage,
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 const { requireAdminAccess, checkPermission } = require('../middleware/roleMiddleware');
@@ -103,5 +104,6 @@ router.get('/coupons', checkPermission(PERMISSIONS.MANAGE_COUPONS), getCoupons);
 router.patch('/coupons/:id', checkPermission(PERMISSIONS.MANAGE_COUPONS), updateCoupon);
 router.delete('/coupons/:id', checkPermission(PERMISSIONS.MANAGE_COUPONS), deleteCoupon);
 router.post('/coupons/assign', checkPermission(PERMISSIONS.MANAGE_COUPONS), assignCoupon);
+router.post('/mailbox/broadcast', checkPermission(PERMISSIONS.MANAGE_USERS), broadcastMailboxMessage);
 
 module.exports = router;
