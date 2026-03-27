@@ -26,16 +26,12 @@ export default function ProfilePage() {
     },
   });
 
-  if (!user) {
-    return (
-      <div className="max-w-md mx-auto px-4 py-20 text-center">
-        <h2 className="text-xl font-bold mb-2">Please sign in</h2>
-        <Link href="/auth/login" className="text-indigo-600 font-semibold hover:underline">Sign In</Link>
-      </div>
-    );
-  }
-
   useEffect(() => {
+    if (!user) {
+      setLoyaltySummary(null);
+      return;
+    }
+
     const loadLoyaltySummary = async () => {
       setLoadingLoyalty(true);
       try {
@@ -49,7 +45,16 @@ export default function ProfilePage() {
     };
 
     loadLoyaltySummary();
-  }, []);
+  }, [user]);
+
+  if (!user) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-20 text-center">
+        <h2 className="text-xl font-bold mb-2">Please sign in</h2>
+        <Link href="/auth/login" className="text-indigo-600 font-semibold hover:underline">Sign In</Link>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
