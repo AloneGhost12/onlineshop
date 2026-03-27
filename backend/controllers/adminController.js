@@ -8,7 +8,6 @@ const Coupon = require('../models/Coupon');
 const FraudLog = require('../models/FraudLog');
 const ApiError = require('../utils/apiError');
 const { applyDeliveryRewards, rollbackDeliveryRewards } = require('../services/loyaltyService');
-const { createOrderMailboxMessage, broadcastAdminMessage } = require('../services/mailboxService');
 const {
   ROLES,
   PERMISSIONS,
@@ -586,53 +585,7 @@ exports.updateOrderStatus = async (req, res, next) => {
     await order.save();
     await order.populate('user', 'name email');
 
-    if (status) {
-      await createOrderMailboxMessage({
-        order,
-        action: 'order_status_updated_by_admin',
-        title: `Order update: ${order.orderNumber}`,
-        message: `Your order status is now "${order.status}".`,
-        createdBy: {
-          role: String(req.user?.role || 'admin').toLowerCase(),
-          userId: req.user?._id || null,
-          name: req.user?.name || 'Admin',
-        },
-      });
-    }
-
     res.json({ success: true, data: order });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Broadcast admin message to user mailbox
-// @route   POST /api/admin/mailbox/broadcast
-// @access  Admin
-exports.broadcastMailboxMessage = async (req, res, next) => {
-  try {
-    const title = String(req.body?.title || '').trim();
-    const message = String(req.body?.message || '').trim();
-
-    if (!title || !message) {
-      return next(ApiError.badRequest('Title and message are required'));
-    }
-
-    const result = await broadcastAdminMessage({
-      title,
-      message,
-      createdBy: {
-        role: String(req.user?.role || 'admin').toLowerCase(),
-        userId: req.user?._id || null,
-        name: req.user?.name || 'Admin',
-      },
-    });
-
-    res.status(201).json({
-      success: true,
-      message: `Broadcast sent to ${result.sent} users`,
-      data: result,
-    });
   } catch (error) {
     next(error);
   }

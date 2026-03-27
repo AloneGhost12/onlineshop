@@ -3,7 +3,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const swaggerUi = require('swagger-ui-express');
 const dotenv = require('dotenv');
 
 // Load env vars
@@ -13,7 +12,6 @@ const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const logger = require('./utils/logger');
-const openApiSpec = require('./docs/openapi');
 
 // Route imports
 const authRoutes = require('./routes/auth');
@@ -24,7 +22,6 @@ const adminRoutes = require('./routes/admin');
 const sellerRoutes = require('./routes/seller');
 const promotionRoutes = require('./routes/promotionRoutes');
 const fraudRoutes = require('./routes/fraudRoutes');
-const mailboxRoutes = require('./routes/mailbox');
 
 const app = express();
 
@@ -89,31 +86,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ─── API Documentation ────────────────────────────
-app.use(
-  '/api/docs',
-  swaggerUi.serve,
-  swaggerUi.setup(openApiSpec, {
-    swaggerOptions: {
-      url: '/api/openapi.json',
-      urls: [
-        {
-          url: '/api/openapi.json',
-          name: 'ShopVault API',
-        },
-      ],
-    },
-    customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'ShopVault API Documentation',
-  })
-);
-
-// ─── OpenAPI Schema Endpoint ───────────────────────
-app.get('/api/openapi.json', (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.json(openApiSpec);
-});
-
 // ─── API Routes ────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -121,7 +93,6 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/seller', sellerRoutes);
-app.use('/api/mailbox', mailboxRoutes);
 app.use('/api', promotionRoutes);
 app.use('/api/admin/fraud', fraudRoutes);
 

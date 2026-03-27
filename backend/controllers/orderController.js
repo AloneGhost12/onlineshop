@@ -22,7 +22,6 @@ const {
   calculateEarnedPoints,
   rollbackDeliveryRewards,
 } = require('../services/loyaltyService');
-const { createOrderMailboxMessage } = require('../services/mailboxService');
 
 // @desc    Create order from cart
 // @route   POST /api/orders
@@ -303,18 +302,6 @@ exports.createOrder = async (req, res, next) => {
     cart.appliedCoupon = undefined;
     await cart.save();
 
-    await createOrderMailboxMessage({
-      order,
-      action: 'order_created',
-      title: `Order placed: ${order.orderNumber}`,
-      message: `Your order has been placed successfully. Total amount: INR ${Number(order.totalPrice || 0).toLocaleString('en-IN')}.`,
-      createdBy: {
-        role: 'system',
-        userId: null,
-        name: 'ShopVault',
-      },
-    });
-
     res.status(201).json({
       success: true,
       data: order,
@@ -374,18 +361,6 @@ exports.cancelOrder = async (req, res, next) => {
     }
 
     await order.save();
-
-    await createOrderMailboxMessage({
-      order,
-      action: 'order_cancelled',
-      title: `Order cancelled: ${order.orderNumber}`,
-      message: 'Your order has been cancelled. Any eligible payment refund will be processed shortly.',
-      createdBy: {
-        role: 'system',
-        userId: null,
-        name: 'ShopVault',
-      },
-    });
 
     res.json({
       success: true,

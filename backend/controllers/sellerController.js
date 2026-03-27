@@ -5,7 +5,6 @@ const Category = require('../models/Category');
 const User = require('../models/User');
 const ApiError = require('../utils/apiError');
 const { applyDeliveryRewards, rollbackDeliveryRewards } = require('../services/loyaltyService');
-const { createOrderMailboxMessage } = require('../services/mailboxService');
 const crypto = require('crypto');
 
 const DEFAULT_COMMISSION_PERCENTAGE = Number(process.env.DEFAULT_SELLER_COMMISSION || 10);
@@ -600,20 +599,6 @@ exports.updateSellerOrderDeliveryStatus = async (req, res, next) => {
     }
 
     await order.save();
-
-    if (previousStatus !== nextStatus) {
-      await createOrderMailboxMessage({
-        order,
-        action: 'order_status_updated_by_seller',
-        title: `Order update: ${order.orderNumber}`,
-        message: `Your order status is now "${order.status}".`,
-        createdBy: {
-          role: 'seller',
-          userId: null,
-          name: req.seller?.storeName || req.seller?.sellerName || 'Seller',
-        },
-      });
-    }
 
     const refreshedOrder = await Order.findById(order._id)
       .populate('user', 'name email phone')
