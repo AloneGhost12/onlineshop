@@ -27,7 +27,9 @@ const User = require('./models/User');
 const app = express();
 
 const ensureBootstrapAdmin = async () => {
-  if (String(process.env.AUTO_BOOTSTRAP_ADMIN || 'true').toLowerCase() === 'false') {
+  const isProduction = String(process.env.NODE_ENV || '').toLowerCase() === 'production';
+  const autoBootstrapDefault = isProduction ? 'false' : 'true';
+  if (String(process.env.AUTO_BOOTSTRAP_ADMIN || autoBootstrapDefault).toLowerCase() === 'false') {
     return;
   }
 

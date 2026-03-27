@@ -519,7 +519,18 @@ const seedDatabase = async () => {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('Connected to MongoDB');
 
+    const isProduction = String(process.env.NODE_ENV || '').toLowerCase() === 'production';
+    const allowProdSeed = String(process.env.ALLOW_PROD_SEED || 'false').toLowerCase() === 'true';
+
+    if (isProduction && !allowProdSeed) {
+      throw new Error('Seeding is blocked in production. Set ALLOW_PROD_SEED=true to override intentionally.');
+    }
+
     const shouldReset = String(process.env.SEED_RESET || '').toLowerCase() === 'true';
+
+    if (isProduction && shouldReset) {
+      throw new Error('SEED_RESET=true is blocked in production to protect live data.');
+    }
 
     if (shouldReset) {
       await User.deleteMany({});
