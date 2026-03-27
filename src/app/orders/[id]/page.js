@@ -176,20 +176,29 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {(Number(order.loyaltyPointsEarned || 0) > 0 || order.referral?.rewardGranted) && (
+      {(Number(order.loyaltyPointsEarned || 0) > 0 || order.referral?.rewardGranted || order.referral?.referrerUserId) && (
         <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-5">
           <h2 className="font-bold text-amber-900 mb-3 flex items-center gap-2">
             <Sparkles className="w-4 h-4" /> Loyalty and Referral Rewards
           </h2>
           {Number(order.loyaltyPointsEarned || 0) > 0 && (
-            <p className="text-sm text-amber-800">You earned {Number(order.loyaltyPointsEarned || 0).toLocaleString('en-IN')} loyalty points from this purchase.</p>
+            <p className="text-sm text-amber-800">
+              {order.loyaltyRewardProcessed
+                ? `You earned ${Number(order.loyaltyPointsEarned || 0).toLocaleString('en-IN')} loyalty points from this purchase.`
+                : `${Number(order.loyaltyPointsEarned || 0).toLocaleString('en-IN')} loyalty points will be credited after delivery.`}
+            </p>
           )}
-          {order.referral?.rewardGranted && (
+          {order.referral?.rewardGranted ? (
             <p className="mt-2 text-sm text-amber-800 flex items-center gap-1.5">
               <Gift className="w-4 h-4" />
               Referral rewards granted: You received {Number(order.referral?.refereeRewardPoints || 0).toLocaleString('en-IN')} points.
             </p>
-          )}
+          ) : order.referral?.referrerUserId ? (
+            <p className="mt-2 text-sm text-amber-800 flex items-center gap-1.5">
+              <Gift className="w-4 h-4" />
+              Referral rewards are pending and will be granted after delivery.
+            </p>
+          ) : null}
         </div>
       )}
 
