@@ -249,6 +249,12 @@ const defaultProducts = [
   },
 ];
 
+const toSlug = (value) =>
+  String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+
 const ensureCatalogSeeded = async () => {
   // Can be disabled explicitly if a project wants to manage data externally.
   if (String(process.env.AUTO_SEED_CATALOG || 'true').toLowerCase() === 'false') {
@@ -267,11 +273,26 @@ const ensureCatalogSeeded = async () => {
   logger.warn('Catalog is empty. Ensuring default categories and products exist.');
 
   await Promise.all(
-    defaultCategories.map((category) =>
-      Category.findOneAndUpdate(
+    defaultCategories.map((category) => {
+      const categoryWithSlug = {
+        ...category,
+        slug: toSlug(category.name),
+      };
+
+      return Category.findOneAndUpdate(
         { name: category.name },
-        { $setOnInsert: category },
-        { upsert: true, new: true }
+        { $setOnInsert: categoryWithSlug },
+        { upsert: true }
+      );
+    })
+  );
+
+  // Repair earlier failed bootstrap rows that may have name but null slug.
+  await Promise.all(
+    defaultCategories.map((category) =>
+      Category.updateOne(
+        { name: category.name, slug: null },
+        { $set: { slug: toSlug(category.name) } }
       )
     )
   );
