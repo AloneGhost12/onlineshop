@@ -1,18 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { Eye, EyeOff, Mail, Lock, User as UserIcon, ArrowRight, Store } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User as UserIcon, ArrowRight, Store, Gift } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    referralCode: '',
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const refValue = new URLSearchParams(window.location.search).get('ref');
+    if (!refValue) return;
+
+    const normalized = String(refValue).trim().toUpperCase();
+    if (!normalized) return;
+
+    setFormData((prev) => ({ ...prev, referralCode: prev.referralCode || normalized }));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +43,7 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      await register(formData.name, formData.email, formData.password);
+      await register(formData.name, formData.email, formData.password, formData.referralCode);
       toast.success('Account created! Welcome to ShopVault!', { icon: '🎉' });
       router.push('/');
     } catch (error) {
@@ -109,6 +126,21 @@ export default function RegisterPage() {
                 placeholder="Re-enter password"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-1.5 block">Referral Code (Optional)</label>
+            <div className="relative">
+              <Gift className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                value={formData.referralCode}
+                onChange={(e) => setFormData({ ...formData, referralCode: e.target.value.toUpperCase() })}
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all"
+                placeholder="SVABC123"
+              />
+            </div>
+            <p className="mt-1 text-xs text-slate-500">Use a friend&apos;s code to unlock welcome loyalty rewards.</p>
           </div>
 
           <button

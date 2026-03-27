@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { orderAPI } from '@/lib/api';
-import { Package, MapPin, CreditCard, CheckCircle, Loader2, ArrowLeft, Ban, Truck } from 'lucide-react';
+import { Package, MapPin, CreditCard, CheckCircle, Loader2, ArrowLeft, Ban, Truck, Sparkles, Gift } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function OrderDetailPage() {
@@ -175,6 +175,23 @@ export default function OrderDetailPage() {
           ))}
         </div>
       </div>
+
+      {(Number(order.loyaltyPointsEarned || 0) > 0 || order.referral?.rewardGranted) && (
+        <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          <h2 className="font-bold text-amber-900 mb-3 flex items-center gap-2">
+            <Sparkles className="w-4 h-4" /> Loyalty and Referral Rewards
+          </h2>
+          {Number(order.loyaltyPointsEarned || 0) > 0 && (
+            <p className="text-sm text-amber-800">You earned {Number(order.loyaltyPointsEarned || 0).toLocaleString('en-IN')} loyalty points from this purchase.</p>
+          )}
+          {order.referral?.rewardGranted && (
+            <p className="mt-2 text-sm text-amber-800 flex items-center gap-1.5">
+              <Gift className="w-4 h-4" />
+              Referral rewards granted: You received {Number(order.referral?.refereeRewardPoints || 0).toLocaleString('en-IN')} points.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Items */}
       <h2 className="font-bold text-slate-900 mb-4">Items ({order.items?.length})</h2>

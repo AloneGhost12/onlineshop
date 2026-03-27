@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { User, Mail, Phone, MapPin, Save, Loader2 } from 'lucide-react';
+import { User, Phone, MapPin, Save, Loader2, Gift, Copy, Sparkles } from 'lucide-react';
+import { authAPI } from '@/lib/api';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { useTheme } from '@/context/ThemeContext';
@@ -11,6 +12,8 @@ export default function ProfilePage() {
   const { user, updateProfile } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const [loading, setLoading] = useState(false);
+  const [loyaltySummary, setLoyaltySummary] = useState(null);
+  const [loadingLoyalty, setLoadingLoyalty] = useState(false);
   const [form, setForm] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
@@ -32,6 +35,22 @@ export default function ProfilePage() {
     );
   }
 
+  useEffect(() => {
+    const loadLoyaltySummary = async () => {
+      setLoadingLoyalty(true);
+      try {
+        const response = await authAPI.getLoyaltySummary();
+        setLoyaltySummary(response.data);
+      } catch {
+        setLoyaltySummary(null);
+      } finally {
+        setLoadingLoyalty(false);
+      }
+    };
+
+    loadLoyaltySummary();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -42,6 +61,15 @@ export default function ProfilePage() {
       toast.error(error.message || 'Failed to update');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const copyValue = async (value, successMessage) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(successMessage);
+    } catch {
+      toast.error('Unable to copy');
     }
   };
 
@@ -108,6 +136,66 @@ export default function ProfilePage() {
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> Save Changes</>}
         </button>
       </form>
+
+      <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
+        <h3 className="font-bold text-emerald-900 flex items-center gap-2">
+          <Sparkles className="w-5 h-5" /> Loyalty and Referral Program
+        </h3>
+        {loadingLoyalty ? (
+          <p className="mt-3 text-sm text-emerald-700">Loading loyalty details...</p>
+        ) : (
+          <>
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+              <div className="rounded-xl bg-white/90 border border-emerald-200 p-3">
+                <p className="text-emerald-700">Available Points</p>
+                <p className="text-xl font-bold text-emerald-900">{Number(loyaltySummary?.loyalty?.points || user.loyalty?.points || 0).toLocaleString('en-IN')}</p>
+              </div>
+              <div className="rounded-xl bg-white/90 border border-emerald-200 p-3">
+                <p className="text-emerald-700">Lifetime Points</p>
+                <p className="text-xl font-bold text-emerald-900">{Number(loyaltySummary?.loyalty?.lifetimePoints || user.loyalty?.lifetimePoints || 0).toLocaleString('en-IN')}</p>
+              </div>
+              <div className="rounded-xl bg-white/90 border border-emerald-200 p-3">
+                <p className="text-emerald-700">Tier</p>
+                <p className="text-xl font-bold text-emerald-900 capitalize">{loyaltySummary?.loyalty?.tier || user.loyalty?.tier || 'bronze'}</p>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-xl border border-emerald-200 bg-white p-4">
+              <p className="text-sm text-emerald-800 font-semibold mb-2 flex items-center gap-2">
+                <Gift className="w-4 h-4" /> Your Referral Code
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center rounded-lg border border-emerald-200 px-3 py-1.5 text-sm font-bold tracking-wide text-emerald-900 bg-emerald-50">
+                  {loyaltySummary?.referral?.code || user.referral?.code || 'N/A'}
+                </span>
+                {(loyaltySummary?.referral?.code || user.referral?.code) && (
+                  <button
+                    type="button"
+                    onClick={() => copyValue(loyaltySummary?.referral?.code || user.referral?.code, 'Referral code copied')}
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    <Copy className="w-3.5 h-3.5" /> Copy Code
+                  </button>
+                )}
+              </div>
+              {loyaltySummary?.referralLink && (
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={() => copyValue(loyaltySummary.referralLink, 'Referral link copied')}
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    <Copy className="w-3.5 h-3.5" /> Copy Referral Link
+                  </button>
+                </div>
+              )}
+              <p className="mt-3 text-xs text-emerald-700">
+                Friend reward: 100 points. Your reward per successful referral: 150 points.
+              </p>
+            </div>
+          </>
+        )}
+      </div>
 
       <div className="mt-6 rounded-2xl border border-slate-200/60 bg-white p-6">
         <h3 className="font-bold text-slate-900">Appearance Settings</h3>

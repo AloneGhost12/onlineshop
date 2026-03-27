@@ -155,6 +155,7 @@ export const authAPI = {
   forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
   resetPassword: (token, password) => api.post('/auth/reset-password', { token, password }),
   getMe: () => api.get('/auth/me'),
+  getLoyaltySummary: () => api.get('/auth/loyalty'),
   updateProfile: (data) => api.put('/auth/profile', data),
   logout: () => api.post('/auth/logout'),
 };

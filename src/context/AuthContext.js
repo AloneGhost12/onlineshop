@@ -42,15 +42,21 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
-  const register = useCallback(async (name, email, password) => {
+  const register = useCallback(async (name, email, password, referralCode = '') => {
     // User registration should start with a clean seller session.
     localStorage.removeItem('sellerToken');
     localStorage.removeItem('seller');
 
-    const data = await authAPI.register({ name, email, password });
+    const data = await authAPI.register({ name, email, password, referralCode });
     localStorage.setItem('token', data.token);
     setUser(data.user);
     return data;
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    const data = await authAPI.getMe();
+    setUser(data.user);
+    return data.user;
   }, []);
 
   const logout = useCallback(async () => {
@@ -79,6 +85,7 @@ export function AuthProvider({ children }) {
         loading,
         login,
         register,
+        refreshUser,
         logout,
         updateProfile,
         isAdmin: hasAdminAccess(user),
