@@ -263,16 +263,7 @@ const ensureCatalogSeeded = async () => {
     return;
   }
 
-  const [categoryCount, productCount] = await Promise.all([
-    Category.countDocuments({}),
-    Product.countDocuments({}),
-  ]);
-
-  if (categoryCount > 0 && productCount > 0) {
-    return;
-  }
-
-  logger.warn('Catalog is empty. Ensuring default categories and products exist.');
+  logger.warn('Ensuring default categories and products exist.');
 
   // Repair earlier bootstrap rows that may have null slugs.
   const productsWithNullSlug = await Product.find({ slug: null }).select('_id title').lean();
@@ -288,6 +279,7 @@ const ensureCatalogSeeded = async () => {
       const categoryWithSlug = {
         ...category,
         slug: toSlug(category.name),
+        isActive: true,
       };
 
       return Category.findOneAndUpdate(
@@ -306,6 +298,11 @@ const ensureCatalogSeeded = async () => {
         { $set: { slug: toSlug(category.name) } }
       )
     )
+  );
+
+  await Category.updateMany(
+    { name: { $in: defaultCategories.map((category) => category.name) } },
+    { $set: { isActive: true } }
   );
 
   const categories = await Category.find({ name: { $in: defaultCategories.map((category) => category.name) } })
@@ -342,7 +339,7 @@ const ensureCatalogSeeded = async () => {
     }
   }
 
-  logger.success(`Default catalog ensured (${categories.length} categories available, ${createdProducts} products created).`);
+  logger.success(`Default catalog ensured (${categories.length} categories available, ${createdProducts} products created in this boot).`);
 };
 
 // Public categories route
