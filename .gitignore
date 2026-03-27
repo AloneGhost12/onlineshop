@@ -42,3 +42,14 @@ next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# Android build artifacts (large binary files)
+android/app/build/
+android/build/
+*.apk
+*.aab
+*.keystore
+
+# Capacitor build files
+capacitor/
+www/
