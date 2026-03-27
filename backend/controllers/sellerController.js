@@ -4,6 +4,7 @@ const Order = require('../models/Order');
 const Category = require('../models/Category');
 const User = require('../models/User');
 const ApiError = require('../utils/apiError');
+const { applyDeliveryRewards, rollbackDeliveryRewards } = require('../services/loyaltyService');
 const crypto = require('crypto');
 
 const DEFAULT_COMMISSION_PERCENTAGE = Number(process.env.DEFAULT_SELLER_COMMISSION || 10);
@@ -567,6 +568,7 @@ exports.updateSellerOrderDeliveryStatus = async (req, res, next) => {
       return next(ApiError.notFound('Order not found for this seller'));
     }
 
+    const previousStatus = String(order.status || '').toLowerCase();
     const deliveryTimestamp = delivered ? new Date() : null;
     order.items.forEach((item) => {
       if (item.sellerId && String(item.sellerId) === String(req.seller._id)) {
@@ -585,6 +587,15 @@ exports.updateSellerOrderDeliveryStatus = async (req, res, next) => {
     } else if (order.status === 'delivered') {
       order.status = 'processing';
       order.deliveredAt = null;
+    }
+
+    const nextStatus = String(order.status || '').toLowerCase();
+    if (nextStatus === 'delivered' && previousStatus !== 'delivered') {
+      await applyDeliveryRewards(order);
+    }
+
+    if (previousStatus === 'delivered' && nextStatus !== 'delivered') {
+      await rollbackDeliveryRewards(order);
     }
 
     await order.save();

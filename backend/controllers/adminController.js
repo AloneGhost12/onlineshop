@@ -7,6 +7,7 @@ const Category = require('../models/Category');
 const Coupon = require('../models/Coupon');
 const FraudLog = require('../models/FraudLog');
 const ApiError = require('../utils/apiError');
+const { applyDeliveryRewards, rollbackDeliveryRewards } = require('../services/loyaltyService');
 const {
   ROLES,
   PERMISSIONS,
@@ -554,19 +555,35 @@ exports.updateOrderStatus = async (req, res, next) => {
   try {
     const { status, paymentStatus } = req.body;
 
-    const update = {};
-    if (status) update.status = status;
-    if (paymentStatus) update.paymentStatus = paymentStatus;
-    if (status === 'delivered') update.deliveredAt = new Date();
-
-    const order = await Order.findByIdAndUpdate(req.params.id, update, {
-      new: true,
-      runValidators: true,
-    }).populate('user', 'name email');
+    const order = await Order.findById(req.params.id);
 
     if (!order) {
       return next(ApiError.notFound('Order not found'));
     }
+
+    const previousStatus = String(order.status || '').toLowerCase();
+
+    if (status) {
+      order.status = status;
+    }
+
+    if (paymentStatus) {
+      order.paymentStatus = paymentStatus;
+    }
+
+    const nextStatus = String(order.status || '').toLowerCase();
+    if (nextStatus === 'delivered' && previousStatus !== 'delivered') {
+      order.deliveredAt = new Date();
+      await applyDeliveryRewards(order);
+    }
+
+    if (previousStatus === 'delivered' && nextStatus !== 'delivered') {
+      order.deliveredAt = null;
+      await rollbackDeliveryRewards(order);
+    }
+
+    await order.save();
+    await order.populate('user', 'name email');
 
     res.json({ success: true, data: order });
   } catch (error) {

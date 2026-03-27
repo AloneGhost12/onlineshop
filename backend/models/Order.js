@@ -164,6 +164,14 @@ const orderSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    loyaltyRewardProcessed: {
+      type: Boolean,
+      default: false,
+    },
+    loyaltyRewardProcessedAt: {
+      type: Date,
+      default: null,
+    },
     referral: {
       referralCodeUsed: {
         type: String,
