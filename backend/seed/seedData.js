@@ -17,7 +17,8 @@ const categories = [
   { name: 'Beauty & Health', description: 'Skincare, makeup, and wellness', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400' },
 ];
 
-const DEFAULT_MOCK_PRODUCTS_PER_CATEGORY = 40;
+const DEFAULT_MOCK_PRODUCTS_PER_CATEGORY = 20;
+const DEFAULT_SEED_TARGET_PRODUCTS = 100;
 
 const GLOBAL_MOCK_IMAGE_POOL = [
   'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600',
@@ -612,7 +613,11 @@ const seedDatabase = async () => {
     const fixedProducts = generateProducts(categoryMap);
     const perCategory = Number(process.env.MOCK_PRODUCTS_PER_CATEGORY) || DEFAULT_MOCK_PRODUCTS_PER_CATEGORY;
     const mockProducts = generateMockProducts(categoryMap, perCategory);
-    const products = [...fixedProducts, ...mockProducts];
+    const targetTotalProducts = Math.max(
+      fixedProducts.length,
+      Number(process.env.SEED_TARGET_PRODUCTS) || DEFAULT_SEED_TARGET_PRODUCTS
+    );
+    const products = [...fixedProducts, ...mockProducts].slice(0, targetTotalProducts);
 
     let createdProducts = [];
     let skippedProducts = 0;
@@ -641,7 +646,8 @@ const seedDatabase = async () => {
 
     console.log(`Created ${createdProducts.length} products`);
     console.log(`  - Fixed products: ${fixedProducts.length}`);
-    console.log(`  - Mock products: ${mockProducts.length}`);
+    console.log(`  - Mock products generated: ${mockProducts.length}`);
+    console.log(`  - Target total products: ${targetTotalProducts}`);
     console.log(`  - Per category mock count: ${perCategory}`);
     if (!shouldReset) {
       console.log(`  - Updated existing products: ${updatedProducts}`);
