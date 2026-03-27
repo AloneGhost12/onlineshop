@@ -258,24 +258,6 @@ const toSlug = (value) =>
 
 const buildSeedProductSlug = (title) => `${toSlug(title)}-seed`;
 
-const repairPublicVisibilityFlags = async () => {
-  // Legacy/manual inserts can miss isActive and then be filtered out from public APIs.
-  await Promise.all([
-    Category.updateMany(
-      {
-        $or: [{ isActive: { $exists: false } }, { isActive: null }],
-      },
-      { $set: { isActive: true } }
-    ),
-    Product.updateMany(
-      {
-        $or: [{ isActive: { $exists: false } }, { isActive: null }],
-      },
-      { $set: { isActive: true } }
-    ),
-  ]);
-};
-
 const ensureCatalogSeeded = async () => {
   // Can be disabled explicitly if a project wants to manage data externally.
   if (String(process.env.AUTO_SEED_CATALOG || 'true').toLowerCase() === 'false') {
@@ -367,7 +349,7 @@ const ensureDefaultUser = async () => {
   }
 
   const demoEmail = 'john@example.com';
-  const existingUser = await User.findOne({ email: demoEmail }).select('+password');
+  const existingUser = await User.findOne({ email: demoEmail }).select('_id');
 
   if (!existingUser) {
     await User.create({
@@ -377,27 +359,6 @@ const ensureDefaultUser = async () => {
       role: 'user',
     });
     logger.warn('Created default demo user (john@example.com).');
-    return;
-  }
-
-  let shouldSave = false;
-  if (existingUser.isBlocked || existingUser.isBanned || existingUser.requiresVerification || existingUser.isFraudFlagged) {
-    existingUser.isBlocked = false;
-    existingUser.isBanned = false;
-    existingUser.requiresVerification = false;
-    existingUser.isFraudFlagged = false;
-    existingUser.banReason = '';
-    shouldSave = true;
-  }
-
-  if (String(process.env.RESET_DEMO_USER_PASSWORD || 'true').toLowerCase() === 'true') {
-    existingUser.password = 'user123';
-    shouldSave = true;
-  }
-
-  if (shouldSave) {
-    await existingUser.save();
-    logger.warn('Refreshed default demo user state and credentials.');
   }
 };
 
@@ -428,7 +389,6 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await connectDB();
-    await repairPublicVisibilityFlags();
     await ensureDefaultUser();
     await ensureCatalogSeeded();
     app.listen(PORT, () => {
