@@ -69,7 +69,8 @@ exports.register = async (req, res, next) => {
 // @access  Public
 exports.login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const email = String(req.body?.email || '').trim().toLowerCase();
+    const password = String(req.body?.password || '');
 
     if (!email || !password) {
       return next(ApiError.badRequest('Please provide email and password'));

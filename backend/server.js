@@ -22,8 +22,55 @@ const adminRoutes = require('./routes/admin');
 const sellerRoutes = require('./routes/seller');
 const promotionRoutes = require('./routes/promotionRoutes');
 const fraudRoutes = require('./routes/fraudRoutes');
+const User = require('./models/User');
 
 const app = express();
+
+const ensureBootstrapAdmin = async () => {
+  if (String(process.env.AUTO_BOOTSTRAP_ADMIN || 'true').toLowerCase() === 'false') {
+    return;
+  }
+
+  const adminEmail = String(process.env.BOOTSTRAP_ADMIN_EMAIL || 'admin@shopvault.com').trim().toLowerCase();
+  const adminPassword = String(process.env.BOOTSTRAP_ADMIN_PASSWORD || 'admin123');
+
+  const existing = await User.findOne({ email: adminEmail }).select('+password');
+  if (!existing) {
+    await User.create({
+      name: 'Admin User',
+      email: adminEmail,
+      password: adminPassword,
+      role: 'admin',
+    });
+    logger.warn(`Bootstrap admin created: ${adminEmail}`);
+    return;
+  }
+
+  let shouldSave = false;
+  if (existing.role !== 'admin') {
+    existing.role = 'admin';
+    shouldSave = true;
+  }
+
+  if (existing.isBlocked || existing.isBanned || existing.requiresVerification || existing.isFraudFlagged) {
+    existing.isBlocked = false;
+    existing.isBanned = false;
+    existing.requiresVerification = false;
+    existing.isFraudFlagged = false;
+    existing.banReason = '';
+    shouldSave = true;
+  }
+
+  if (String(process.env.RESET_BOOTSTRAP_ADMIN_PASSWORD || 'false').toLowerCase() === 'true') {
+    existing.password = adminPassword;
+    shouldSave = true;
+  }
+
+  if (shouldSave) {
+    await existing.save();
+    logger.warn(`Bootstrap admin refreshed: ${adminEmail}`);
+  }
+};
 
 const defaultAllowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
 const allowedOrigins = [
@@ -124,6 +171,7 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await connectDB();
+    await ensureBootstrapAdmin();
     app.listen(PORT, () => {
       logger.success(`Server running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV}`);
