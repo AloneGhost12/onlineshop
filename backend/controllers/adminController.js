@@ -6,6 +6,7 @@ const Seller = require('../models/Seller');
 const Category = require('../models/Category');
 const Coupon = require('../models/Coupon');
 const FraudLog = require('../models/FraudLog');
+const MailboxMessage = require('../models/MailboxMessage');
 const ApiError = require('../utils/apiError');
 const { applyDeliveryRewards, rollbackDeliveryRewards } = require('../services/loyaltyService');
 const { createOrderMailboxMessage, broadcastAdminMessage } = require('../services/mailboxService');
@@ -266,6 +267,65 @@ exports.getDashboard = async (req, res, next) => {
           activeCoupons: couponUsageData[0]?.activeCoupons || 0,
         },
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get data partition summary
+// @route   GET /api/admin/data-partitions
+// @access  Admin
+exports.getDataPartitionSummary = async (req, res, next) => {
+  try {
+    const summarize = async (Model, label) => {
+      const [total, grouped] = await Promise.all([
+        Model.countDocuments({}),
+        Model.aggregate([
+          {
+            $group: {
+              _id: '$dataPartition',
+              count: { $sum: 1 },
+            },
+          },
+        ]),
+      ]);
+
+      const summary = {
+        live: 0,
+        seed: 0,
+        unknown: 0,
+        total,
+      };
+
+      for (const item of grouped) {
+        const partition = String(item._id || '').toLowerCase();
+        if (partition === 'live') {
+          summary.live += item.count;
+        } else if (partition === 'seed') {
+          summary.seed += item.count;
+        } else {
+          summary.unknown += item.count;
+        }
+      }
+
+      return [label, summary];
+    };
+
+    const data = Object.fromEntries(
+      await Promise.all([
+        summarize(User, 'users'),
+        summarize(Product, 'products'),
+        summarize(Category, 'categories'),
+        summarize(Order, 'orders'),
+        summarize(MailboxMessage, 'mailboxMessages'),
+      ])
+    );
+
+    res.json({
+      success: true,
+      data,
+      generatedAt: new Date().toISOString(),
     });
   } catch (error) {
     next(error);

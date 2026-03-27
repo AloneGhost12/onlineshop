@@ -3,6 +3,7 @@ const { body } = require('express-validator');
 const router = express.Router();
 const {
   getDashboard,
+  getDataPartitionSummary,
   getAllOrders,
   updateOrderStatus,
   getAllUsers,
@@ -85,6 +86,7 @@ function nonUserRoleValidation(value) {
 router.use(protect, requireAdminAccess);
 
 router.get('/dashboard', checkPermission(PERMISSIONS.VIEW_ANALYTICS), getDashboard);
+router.get('/data-partitions', checkPermission(PERMISSIONS.VIEW_ANALYTICS), getDataPartitionSummary);
 router.get('/rbac', checkPermission(PERMISSIONS.MANAGE_ADMINS), getRbacConfig);
 router.get('/orders', checkPermission(PERMISSIONS.MANAGE_ORDERS), getAllOrders);
 router.put('/orders/:id', checkPermission(PERMISSIONS.MANAGE_ORDERS), updateOrderStatus);
