@@ -195,6 +195,13 @@ export const checkoutAPI = {
   applyPromotions: () => api.post('/checkout/apply-promotions'),
 };
 
+export const mailboxAPI = {
+  getAll: (params) => api.get('/mailbox', { params }),
+  getUnreadCount: () => api.get('/mailbox/unread-count'),
+  markRead: (id) => api.patch(`/mailbox/${id}/read`),
+  markAllRead: () => api.patch('/mailbox/read-all'),
+};
+
 // ─── Categories ────────────────────────────────────
 export const categoryAPI = {
   getAll: () => api.get('/categories'),

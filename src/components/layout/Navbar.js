@@ -6,9 +6,10 @@ import { useAuth } from '@/context/AuthContext';
 import { useSellerAuth } from '@/context/SellerAuthContext';
 import { useCart } from '@/context/CartContext';
 import { sellerAPI } from '@/lib/api';
+import { mailboxAPI } from '@/lib/api';
 import {
   ShoppingCart, User, Search, Menu, X, LogOut, Package,
-  LayoutDashboard, ChevronDown, Store
+  LayoutDashboard, ChevronDown, Store, Mail
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -19,6 +20,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [sellerApplicationStatus, setSellerApplicationStatus] = useState('none');
+  const [mailboxUnreadCount, setMailboxUnreadCount] = useState(0);
   const canAccessSellerHubFromUserMenu = Boolean(
     isSeller
     && seller?.email
@@ -51,6 +53,36 @@ export default function Navbar() {
 
     return () => {
       mounted = false;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadUnreadCount = async () => {
+      if (!user) {
+        setMailboxUnreadCount(0);
+        return;
+      }
+
+      try {
+        const response = await mailboxAPI.getUnreadCount();
+        if (mounted) {
+          setMailboxUnreadCount(Number(response?.data?.unreadCount || 0));
+        }
+      } catch {
+        if (mounted) {
+          setMailboxUnreadCount(0);
+        }
+      }
+    };
+
+    loadUnreadCount();
+    const interval = setInterval(loadUnreadCount, 20000);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
     };
   }, [user]);
 
@@ -146,6 +178,13 @@ export default function Navbar() {
                         <Link href="/orders" onClick={() => setProfileOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                           <Package className="w-4 h-4" /> My Orders
+                        </Link>
+                        <Link href="/mailbox" onClick={() => setProfileOpen(false)}
+                          className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                          <span className="inline-flex items-center gap-3"><Mail className="w-4 h-4" /> Mailbox</span>
+                          {mailboxUnreadCount > 0 && (
+                            <span className="rounded-full bg-indigo-600 px-2 py-0.5 text-[11px] font-semibold text-white">{mailboxUnreadCount > 99 ? '99+' : mailboxUnreadCount}</span>
+                          )}
                         </Link>
                         {isAdmin && (
                           <Link href="/admin" onClick={() => setProfileOpen(false)}
@@ -261,6 +300,10 @@ export default function Navbar() {
                 <Link href="/orders" onClick={() => setMobileOpen(false)}
                   className="block px-4 py-2.5 text-sm rounded-xl hover:bg-slate-50 transition-colors">
                   My Orders
+                </Link>
+                <Link href="/mailbox" onClick={() => setMobileOpen(false)}
+                  className="block px-4 py-2.5 text-sm rounded-xl hover:bg-slate-50 transition-colors">
+                  Mailbox {mailboxUnreadCount > 0 && `(${mailboxUnreadCount > 99 ? '99+' : mailboxUnreadCount})`}
                 </Link>
                 {isAdmin && (
                   <Link href="/admin" onClick={() => setMobileOpen(false)}
