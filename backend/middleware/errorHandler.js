@@ -5,6 +5,13 @@ const errorHandler = (err, req, res, next) => {
   let message = err.message || 'Internal Server Error';
   let errors = err.errors || [];
 
+  // Ensure CORS headers are set
+  const origin = req.get('origin');
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
   // Mongoose validation error
   if (err.name === 'ValidationError') {
     statusCode = 400;
@@ -27,6 +34,12 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'CastError') {
     statusCode = 400;
     message = `Invalid ${err.path}: ${err.value}`;
+  }
+
+  // MongoDB connection errors
+  if (err.name === 'MongoError' || err.name === 'MongoNetworkError') {
+    statusCode = 503;
+    message = 'Database connection error. Please try again later.';
   }
 
   // Log error in development

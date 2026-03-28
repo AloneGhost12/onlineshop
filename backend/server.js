@@ -90,6 +90,8 @@ const vercelOriginPattern = /^https:\/\/[a-z0-9-]+\.vercel\.app$/i;
 
 const corsOptions = {
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   origin: (origin, callback) => {
     if (!origin) {
       return callback(null, true);
@@ -107,12 +109,16 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    return callback(new Error(`CORS blocked for origin: ${origin}`));
+    // Log but don't block - let response succeed with CORS headers if possible
+    console.warn(`CORS request from origin: ${origin}`);
+    return callback(null, true);
   },
 };
 
 // ─── Security Middleware ───────────────────────────
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
 app.use(cors(corsOptions));
 app.use(apiLimiter);
 
@@ -128,11 +134,15 @@ if (process.env.NODE_ENV === 'development') {
 
 // ─── Health Check ──────────────────────────────────
 app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'ShopVault API is running',
+  const dbState = require('mongoose').connection.readyState;
+  const dbStateMap = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
+  
+  res.status(dbState === 1 ? 200 : 503).json({
+    success: dbState === 1,
+    message: dbState === 1 ? 'ShopVault API is running' : 'Service partially unavailable',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
+    database: dbStateMap[dbState] || 'unknown',
   });
 });
 
